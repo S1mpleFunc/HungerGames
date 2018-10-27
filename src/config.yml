@@ -1,0 +1,137 @@
+# Func's plugin for Cristalix* - HungerGames
+# Version 1.1
+
+# MySQL Keys
+
+user: 'root'
+password: 'admin'
+host: 'localhost'
+database: 'data'
+port: 3306
+
+# Info About Player Connection
+
+profile.new: '[§b!§f] Новый профиль был создан.'
+profile.connected: '[§a!§f] Ваш профиль был загружен.'
+profile.exception: '[§c!§f] Что то пошло не так... Ошибка номер: 1.'
+
+# Lobby Values
+
+name: '§lHunger§c§lGames'
+waiting_time: 45
+people_need: 1
+death_match: 180
+end_time: 15
+
+# Compass
+
+compass.name: '§fНаблюдать [§e§lЛКМ§f]'
+
+# Scoreboard Scores
+
+score:
+    - 'В живых: §l'
+    - 'Следующие событие: §a'
+    - 'Начало: §l'
+    - 'Заполнение сундуков §l'
+    - 'Битва последних §c§l'
+    - 'Убийств: §c§l'
+    - 'Денариев: §6§l'
+    - 'Побед: §e§l'
+    - 'Дистрикт: §b§l'
+    - 'Онлайн: §l'
+    - 'Убийств/Все время: §c§l'
+
+# Chest Values
+chest.reload: 180
+chest.reload_value: 3
+
+ready.time: 5
+ready.message: '[§b!§f] До начала игры осталось '
+
+lobby.world: 'world'
+lobby.x: 1365
+lobby.y: 53
+lobby.z: -2009
+
+# Game Values
+
+game.starting_time: 10
+game.starting_message: '[§b!§f] Игра начнется через '
+game.start_message: '[§a!§f] Игра началась.'
+game.chest_message: '[§a!§f] Сундуки перезаполнены.'
+game.fight_message: '[§b!§f] Начался последний бой!'
+game.kills_message: '[§b!§f] §c§lСтраница убийств:'
+game.end_message: '[§b!§f] Игра завершится через §l'
+
+game.world: 'world'
+game.x: 1366
+game.y: 53
+game.z: -2009
+game.radius: 25
+game.size: 100
+game.default_size: 500
+
+# Event Messages
+
+event.join: '[§a!§f] К игре присоединился '
+event.quit: '[§c!§f] От игры отключился '
+
+# Random Items
+
+range.min: 1
+range.max: 4
+
+range.min_value: 0
+range.max_value: 20
+
+random.food:
+    - 'BREAD'
+    - 'APPLE'
+    - 'CARROT'
+    - 'COOKED_BEEF'
+    - 'COOKED_CHICKEN'
+    - 'COOKED_FISH'
+random.bad_items:
+    - 'LEATHER_HELMET'
+    - 'LEATHER_CHESTPLATE'
+    - 'LEATHER_LEGGINGS'
+    - 'LEATHER_BOOTS'
+    - 'GOLD_HELMET'
+    - 'GOLD_CHESTPLATE'
+    - 'GOLD_LEGGINGS'
+    - 'GOLD_BOOTS'
+    - 'WOOD_SWORD'
+    - 'GOLD_SWORD'
+
+    - 'STICK'
+    - 'LEATHER'
+    - 'FEATHER'
+    - 'FLINT'
+    - 'STICK'
+    - 'LEATHER'
+    - 'FEATHER'
+    - 'FLINT'
+random.good_items:
+    - 'BOW'
+    - 'DIAMOND'
+    - 'DIAMOND'
+    - 'IRON_INGOT'
+
+    - 'IRON_HELMET'
+    - 'IRON_CHESTPLATE'
+    - 'IRON_LEGGINGS'
+    - 'IRON_BOOTS'
+    - 'IRON_SWORD'
+
+    - 'CHAINMAIL_HELMET'
+    - 'CHAINMAIL_CHESTPLATE'
+    - 'CHAINMAIL_LEGGINGS'
+    - 'CHAINMAIL_BOOTS'
+    - 'CHAINMAIL_HELMET'
+    - 'CHAINMAIL_CHESTPLATE'
+    - 'CHAINMAIL_LEGGINGS'
+    - 'CHAINMAIL_BOOTS'
+
+    - 'GOLDEN_APPLE'
+    - 'GOLDEN_CARROT'
