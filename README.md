@@ -1,4 +1,4 @@
 # HungerGames
 All rights reserved.
-Crtstalix Property.
+Cristalix Property.
 Made By Func.
