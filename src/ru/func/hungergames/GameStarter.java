@@ -14,13 +14,14 @@ public class GameStarter {
     public static HashMap<String, Integer> open_chest = new HashMap<>();
     public static LinkedList<Player> life_players = new LinkedList<>();
 
-    public static void startGame (HungerGames plugin) {
+    public static void startGame () {
+        HungerGames plugin = HungerGames.getInstance();
         int online = Bukkit.getOnlinePlayers().size();
         int people_need = plugin.getConfig().getInt("people_need");
         if (online < people_need) {
             Bukkit.broadcastMessage("[§c!§f] Недостаточно игроков до начала, нужно еще §l" + (people_need - online));
             HungerGames.sendTitle("[§c§l!§f]", "Игра Отменена");
-            Lobby.waitLobby(plugin);
+            Lobby.waitLobby();
             return;
         }
         GameStatus.STARTING.setActive();
@@ -31,7 +32,7 @@ public class GameStarter {
             p.getInventory().clear();
             p.setFoodLevel(20);
         }
-        setLocation(plugin);
+        setLocation();
         HungerGames.updateScores(plugin, 0, 0, 0);
 
         new BukkitRunnable() {
@@ -60,7 +61,7 @@ public class GameStarter {
                 if (value_of_chest_replace == 0) {
                     death_time = death_time - 1;
                     if (death_time == 0) {
-                        setLocation(plugin);
+                        setLocation();
                         HungerGames.sendTitle("[§c§l!§f]", "Последний бой");
                         Bukkit.broadcastMessage(plugin.getConfig().getString("game.fight_message"));
                         Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setCenter(Lobby.center);
@@ -93,8 +94,9 @@ public class GameStarter {
         }.runTaskTimer(plugin, 0, 20);
     }
 
-    private static void setLocation (HungerGames plugin)
+    private static void setLocation ()
     {
+        HungerGames plugin = HungerGames.getInstance();
         //Распределение игроков на окружности, с радиусом game.radius, и Окр(center)
         Location center = new Location(Bukkit.getWorld(plugin.getConfig().getString("game.world")), plugin.getConfig().getInt("game.x"), plugin.getConfig().getInt("game.y"), plugin.getConfig().getInt("game.z"));
         int radius = plugin.getConfig().getInt("game.radius");

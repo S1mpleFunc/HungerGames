@@ -10,7 +10,9 @@ public class Lobby {
 
     public static Location center;
 
-    public static void waitLobby (HungerGames plugin) {
+    public static void waitLobby () {
+        HungerGames plugin = HungerGames.getInstance();
+
         GameStatus.WAITING.setActive();
         center = new Location(
                 Bukkit.getServer().getWorld(plugin.getConfig().getString("lobby.world")),
@@ -39,7 +41,7 @@ public class Lobby {
                     p.setLevel(waitingTime);
                 if (waitingTime == 0)
                 {
-                    GameStarter.startGame(plugin);
+                    GameStarter.startGame();
                     this.cancel();
                 }
                 else if (waitingTime <= plugin.getConfig().getInt("ready.time"))

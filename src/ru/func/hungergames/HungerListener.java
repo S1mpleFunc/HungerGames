@@ -27,11 +27,9 @@ import java.util.LinkedList;
 import java.util.Random;
 
 public class HungerListener implements Listener {
-    private HungerGames plugin;
-    public HungerListener (HungerGames hg)
-    {
-        plugin = hg;
-    }
+
+    HungerGames plugin = HungerGames.getInstance();
+
     public static LinkedList<Location> openned_chests = new LinkedList<>();
     private Random randomGenerator = new Random();
 

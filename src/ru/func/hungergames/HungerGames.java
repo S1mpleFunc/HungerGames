@@ -17,6 +17,11 @@ import java.util.List;
 
 public class HungerGames extends JavaPlugin {
 
+    private static final HungerGames instance = new HungerGames();
+    public static HungerGames getInstance()
+    {
+        return instance;
+    }
     static ScoreboardManager manager;
 
     public static LinkedList<ItemStack> bad_items = new LinkedList<>();
@@ -38,7 +43,7 @@ public class HungerGames extends JavaPlugin {
         compass.setItemMeta(compass_meta);
 
         scores.addAll(getConfig().getStringList("score"));
-        Bukkit.getPluginManager().registerEvents(new HungerListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new HungerListener(), this);
         MySql base = new MySql(getConfig().getString("user"), getConfig().getString("password"), getConfig().getString("host"), getConfig().getString("database"), getConfig().getInt("port"));
         try {
             getLogger().info("[!] Connecting to DataBase.");
@@ -54,7 +59,7 @@ public class HungerGames extends JavaPlugin {
         for (Player p : Bukkit.getOnlinePlayers())
             loadStats(p, this);
 
-        Lobby.waitLobby(this);
+        Lobby.waitLobby();
 
         toItemStack("random.bad_items", bad_items);
         toItemStack("random.good_items", good_items);
