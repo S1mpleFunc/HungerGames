@@ -1,17 +1,12 @@
 package ru.func.hungergames;
-
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-
 public class Lobby {
     public static Location center;
-
-    public static void waitLobby () {
-        HungerGames plugin = HungerGames.getInstance();
-
+    public static void waitLobby (HungerGames plugin) {
         GameStatus.WAITING.setActive();
         center = new Location(
                 Bukkit.getServer().getWorld(plugin.getConfig().getString("lobby.world")),
@@ -26,7 +21,6 @@ public class Lobby {
         }
         Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setCenter(center);
         Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setSize(plugin.getConfig().getInt("game.default_size"));
-
         new BukkitRunnable() {
             public int waitingTime = plugin.getConfig().getInt("waiting_time");
             @Override
@@ -39,7 +33,7 @@ public class Lobby {
                     p.setLevel(waitingTime);
                 if (waitingTime == 0)
                 {
-                    GameStarter.startGame();
+                    GameStarter.startGame(plugin);
                     this.cancel();
                 }
                 else if (waitingTime <= plugin.getConfig().getInt("ready.time"))

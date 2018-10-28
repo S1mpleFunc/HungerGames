@@ -23,6 +23,13 @@ people_need: 1
 death_match: 180
 end_time: 15
 
+# Lores
+
+lores.sponsor: '§fНЕ ДОСТУПНО'
+lores.chance: '§fПосмотреть вероятность победы\n§fНЕ ДОСТУПНО'
+lores.teleport: '§fПеремещение к выбранному игроку.'
+lores.inventory: '§fПосмотреть инвентарь игрока.'
+
 # Compass
 
 compass.name: '§fНаблюдать [§e§lЛКМ§f]'
@@ -50,9 +57,9 @@ ready.time: 5
 ready.message: '[§b!§f] До начала игры осталось '
 
 lobby.world: 'world'
-lobby.x: 1365
-lobby.y: 53
-lobby.z: -2009
+lobby.x: 257
+lobby.y: 78
+lobby.z: 256
 
 # Game Values
 
@@ -65,12 +72,12 @@ game.kills_message: '[§b!§f] §c§lСтраница убийств:'
 game.end_message: '[§b!§f] Игра завершится через §l'
 
 game.world: 'world'
-game.x: 1366
-game.y: 53
-game.z: -2009
+game.x: 257
+game.y: 78
+game.z: 256
 game.radius: 25
-game.size: 100
-game.default_size: 500
+game.size: 250
+game.default_size: 2000
 
 # Event Messages
 
@@ -114,7 +121,6 @@ random.bad_items:
     - 'FLINT'
 random.good_items:
     - 'BOW'
-    - 'DIAMOND'
     - 'DIAMOND'
     - 'IRON_INGOT'
 

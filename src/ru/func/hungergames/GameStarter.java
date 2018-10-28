@@ -1,8 +1,7 @@
 package ru.func.hungergames;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import java.util.HashMap;
@@ -14,14 +13,13 @@ public class GameStarter {
     public static HashMap<String, Integer> open_chest = new HashMap<>();
     public static LinkedList<Player> life_players = new LinkedList<>();
 
-    public static void startGame () {
-        HungerGames plugin = HungerGames.getInstance();
+    public static void startGame (HungerGames plugin) {
         int online = Bukkit.getOnlinePlayers().size();
         int people_need = plugin.getConfig().getInt("people_need");
         if (online < people_need) {
             Bukkit.broadcastMessage("[§c!§f] Недостаточно игроков до начала, нужно еще §l" + (people_need - online));
             HungerGames.sendTitle("[§c§l!§f]", "Игра Отменена");
-            Lobby.waitLobby();
+            Lobby.waitLobby(plugin);
             return;
         }
         GameStatus.STARTING.setActive();
@@ -32,9 +30,8 @@ public class GameStarter {
             p.getInventory().clear();
             p.setFoodLevel(20);
         }
-        setLocation();
+        setLocation(plugin);
         HungerGames.updateScores(plugin, 0, 0, 0);
-
         new BukkitRunnable() {
             int time_for_starting = plugin.getConfig().getInt("game.starting_time");
             int time_for_chest = plugin.getConfig().getInt("chest.reload");
@@ -55,13 +52,12 @@ public class GameStarter {
                 HungerGames.updateScores(plugin, time_for_starting, 0, 0);
                 time_for_starting = time_for_starting - 1;
                 // ИГРА НАЧАЛАСЬ
-
                 if (!GameStatus.STARTED.isActive())
                     return;
                 if (value_of_chest_replace == 0) {
                     death_time = death_time - 1;
                     if (death_time == 0) {
-                        setLocation();
+                        setLocation(plugin);
                         HungerGames.sendTitle("[§c§l!§f]", "Последний бой");
                         Bukkit.broadcastMessage(plugin.getConfig().getString("game.fight_message"));
                         Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setCenter(Lobby.center);
@@ -79,9 +75,8 @@ public class GameStarter {
                 if (time_for_chest == 0) {
                     time_for_chest = plugin.getConfig().getInt("chest.reload");
                     for (Location loc : HungerListener.openned_chests) {
-                        loc.getBlock().setType(Material.AIR);
-                        loc.getBlock().setType(Material.CHEST);
-
+                        Chest chest = (Chest) loc.getBlock().getState();
+                        chest.getBlockInventory().clear();
                     }
                     HungerGames.sendTitle("[§a§l!§f]", "Сундуки заполнены");
                     HungerListener.openned_chests.clear();
@@ -93,10 +88,8 @@ public class GameStarter {
             }
         }.runTaskTimer(plugin, 0, 20);
     }
-
-    private static void setLocation ()
+    private static void setLocation (HungerGames plugin)
     {
-        HungerGames plugin = HungerGames.getInstance();
         //Распределение игроков на окружности, с радиусом game.radius, и Окр(center)
         Location center = new Location(Bukkit.getWorld(plugin.getConfig().getString("game.world")), plugin.getConfig().getInt("game.x"), plugin.getConfig().getInt("game.y"), plugin.getConfig().getInt("game.z"));
         int radius = plugin.getConfig().getInt("game.radius");
@@ -104,7 +97,7 @@ public class GameStarter {
         //Вычсление угла. 360 / online
         for (Player p : GameStarter.life_players) {
             p.setExp(0);
-            angle += 2 * Math.PI / Bukkit.getOnlinePlayers().size();
+            angle += 2 * Math.PI / GameStarter.life_players.size();
             x = Math.cos(angle) * radius;
             z = Math.sin(angle) * radius;
             Location point = new Location(Bukkit.getWorld(plugin.getConfig().getString("game.world")), center.getX() + x, center.getY(), center.getZ() + z);
