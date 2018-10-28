@@ -23,7 +23,6 @@ public class HungerGames extends JavaPlugin {
         return instance;
     }
     static ScoreboardManager manager;
-
     public static LinkedList<ItemStack> bad_items = new LinkedList<>();
     public static LinkedList<ItemStack> good_items = new LinkedList<>();
     public static LinkedList<ItemStack> food_items = new LinkedList<>();

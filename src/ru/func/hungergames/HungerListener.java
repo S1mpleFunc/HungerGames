@@ -171,7 +171,9 @@ public class HungerListener implements Listener {
         }
         Player winner = GameStarter.life_players.get(0);
         GameStatus.FINISHING.setActive();
+
         saveStats();
+
         Bukkit.broadcastMessage("[§a!§f]§l " + winner.getName() + " §f победил!");
         HungerGames.sendTitle("[§a!§f]", "Победа!");
         Bukkit.broadcastMessage(plugin.getConfig().getString("game.kills_message"));
