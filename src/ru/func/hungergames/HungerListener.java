@@ -45,6 +45,7 @@ public class HungerListener implements Listener {
             e.getPlayer().setGameMode(GameMode.SPECTATOR);
             for (int i = 0; i < 9; i ++)
                 e.getPlayer().getInventory().setItem(i, HungerGames.compass);
+            GameStarter.kills.put(e.getPlayer().getName(), 0);
         }
         e.setJoinMessage(plugin.getConfig().getString("event.join") + "§l" + e.getPlayer().getName());
     }
@@ -94,15 +95,12 @@ public class HungerListener implements Listener {
             if (GameStarter.open_chest.get(name) % 4 == 0) {
                 chestSetter(HungerGames.good_items, e.getInventory(), random_size);
                 GameStarter.open_chest.replace(name, 0);
-            }
-            else {
+            } else
                 chestSetter(HungerGames.bad_items, e.getInventory(), random_size);
-                e.getInventory().addItem(HungerGames.food_items.get(randomGenerator.nextInt(HungerGames.food_items.size())));
-            }
-            if (e.getPlayer().getHealth() < 7)
-                e.getInventory().addItem(new ItemStack(Material.POTION, 1, (short) 16389));
-            else if (e.getPlayer().getInventory().contains(Material.BOW))
-                e.getInventory().addItem(new ItemStack(Material.ARROW, (int) (Math.random() * 11) + 0));
+            e.getInventory().addItem(HungerGames.food_items.get(randomGenerator.nextInt(HungerGames.food_items.size())));
+
+            if (e.getPlayer().getInventory().contains(Material.BOW))
+                e.getInventory().addItem(new ItemStack(Material.ARROW, (int) (Math.random() * 6)));
 
             openned_chests.add(e.getInventory().getLocation());
         }
@@ -134,14 +132,12 @@ public class HungerListener implements Listener {
         if (item.getType().equals(Material.SKULL_ITEM))
             e.setCancelled(true);
     }
-    // При убийстве
     @EventHandler
     public void onDeath (PlayerDeathEvent e) {
         Player death = e.getEntity();
         Player killer = death.getKiller();
-        if (GameStarter.life_players.contains(death))
-            GameStarter.life_players.remove(death);
         try {
+            GameStarter.life_players.remove(death);
             e.setDeathMessage("[§b!§f] §l" + killer.getName() + " §fубил §l" + death.getName() + "§f. В живых осталось(ся): §l" + GameStarter.life_players.size());
         } catch (NullPointerException ex)
         {
@@ -201,10 +197,9 @@ public class HungerListener implements Listener {
                     int new_kills = rs.getInt("kills") + GameStarter.kills.get(name);
                     int new_coins = rs.getInt("gold") + GameStarter.kills.get(name) * 5;
                     int new_deaths = rs.getInt("deaths") + 1;
-                    if (GameStarter.life_players.contains(p)) {
-                        int new_wins = rs.getInt("wins") + 1;
+                    int new_wins = rs.getInt("wins") + 1;
+                    if (GameStarter.life_players.contains(p))
                         HungerGames.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', wins = '" + new_wins + "' WHERE name = '" + name + "';");
-                    }
                     else
                         HungerGames.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', deaths = '" + new_deaths + "' WHERE name = '" + name + "';");
                 }
@@ -230,7 +225,6 @@ public class HungerListener implements Listener {
     }
     @EventHandler
     public void onBlockPlace (BlockPlaceEvent e) { e.setCancelled(true); }
-    // При лобби
     @EventHandler
     public void onDamage (EntityDamageEvent e)
     {

@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class Lobby {
-
     public static Location center;
 
     public static void waitLobby () {
@@ -20,7 +19,6 @@ public class Lobby {
                 plugin.getConfig().getInt("lobby.y") + 0F,
                 plugin.getConfig().getInt("lobby.z") + 0.5F
         );
-
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.getInventory().clear();
             p.setGameMode(GameMode.SURVIVAL);
