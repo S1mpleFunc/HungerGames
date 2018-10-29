@@ -8,11 +8,13 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class HungerCommands implements CommandExecutor {
+
     private HungerGames plugin;
     public HungerCommands (HungerGames hg)
     {
         plugin = hg;
     }
+
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         if (commandSender instanceof Player) {

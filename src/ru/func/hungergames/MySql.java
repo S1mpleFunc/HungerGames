@@ -18,7 +18,6 @@ public class MySql extends Database {
         this.password = password;
         this.host = host;
         this.database = database;
-
         this.port = port;
     }
 
@@ -27,7 +26,6 @@ public class MySql extends Database {
         if (checkConnection()) {
             return connection;
         }
-
         Class.forName("com.mysql.jdbc.Driver");
         connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database + "?characterEncoding=UTF-8&autoReconnect=true", this.user, this.password);
         return connection;

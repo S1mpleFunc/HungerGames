@@ -24,22 +24,21 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.Random;
 public class HungerListener implements Listener {
+
     private HungerGames plugin;
-    public HungerListener (HungerGames hg)
-    {
-        plugin = hg;
-    }
+    public HungerListener (HungerGames hg) { plugin = hg; }
+
     public static LinkedList<Location> openned_chests = new LinkedList<>();
     private Random randomGenerator = new Random();
+
     @EventHandler
     public void onJoin (PlayerJoinEvent e)
     {
+        HungerGames.loadStats(e.getPlayer(), plugin);
         HungerGames.hashStats(e.getPlayer().getUniqueId());
-        if (GameStatus.WAITING.isActive()) {
-            HungerGames.loadStats(e.getPlayer(), plugin);
+        HungerGames.updateScores(plugin, 0, 0, 0);
+        if (GameStatus.WAITING.isActive())
             e.getPlayer().teleport(Lobby.center);
-            HungerGames.updateScores(plugin, 0, 0, 0);
-        }
         else if (GameStatus.STARTED.isActive() || GameStatus.STARTING.isActive()) {
             e.getPlayer().setGameMode(GameMode.SPECTATOR);
             for (int i = 0; i < 9; i ++)
@@ -216,8 +215,7 @@ public class HungerListener implements Listener {
                     else
                         HungerGames.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', deaths = '" + new_deaths + "' WHERE uuid = '" + p.getUniqueId() + "';");
                 }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
+            } catch (SQLException | NullPointerException ex) {
             }
         }
     }

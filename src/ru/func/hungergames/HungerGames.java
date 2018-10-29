@@ -1,8 +1,6 @@
 package ru.func.hungergames;
-import org.bukkit.Bukkit;
-import org.bukkit.Difficulty;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -58,6 +56,7 @@ public class HungerGames extends JavaPlugin {
         for (Player p : Bukkit.getOnlinePlayers()) {
             loadStats(p, this);
             hashStats(p.getUniqueId());
+            p.setFoodLevel(20);
         }
         Lobby.waitLobby(this);
         toItemStack("random.bad_items", bad_items);
@@ -73,8 +72,16 @@ public class HungerGames extends JavaPlugin {
         world.getEntities().clear();
 
         getCommand("center").setExecutor(new HungerCommands(this));
-
         getLogger().info(getConfig().getString("name") + " был запущен.");
+    }
+    @Override
+    public void onDisable ()
+    {
+        for (Location loc : HungerListener.openned_chests) {
+            Chest chest = (Chest) loc.getBlock().getState();
+            chest.getBlockInventory().clear();
+        }
+        HungerListener.openned_chests.clear();
     }
     public static void loadStats (Player p, HungerGames plugin)
     {

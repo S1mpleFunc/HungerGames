@@ -1,6 +1,7 @@
 package ru.func.hungergames;
 
 public enum GameStatus {
+
     WAITING (false),
     STARTING(false),
     STARTED(false),

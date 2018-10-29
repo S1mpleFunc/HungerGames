@@ -79,7 +79,6 @@ public class PlayerGUI {
         lores.add("§fУбийств/Все время: §l" + HungerGames.playerStats.get(l.getUniqueId()).getKills());
         lores.add("§fУбийств: §l" + GameStarter.kills.get(l.getName()));
         lores.add("§fK/D: §l" + HungerGames.playerStats.get(l.getUniqueId()).getKD());
-
         im.setLore(lores);
 
         im.setDisplayName("§e§lСтатистика игрока");
