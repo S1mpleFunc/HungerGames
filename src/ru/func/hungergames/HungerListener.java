@@ -179,7 +179,7 @@ public class HungerListener implements Listener {
     }
     private void chestSetter (LinkedList<ItemStack> items, Inventory inv, int size)
     {
-        //Заполняет сундук случайными НЕ повторяющимещя вещами, из LinkedList<ItemStack> items списка
+        //Заполняет сундук случайными НЕ повторяющимищя вещами, из LinkedList<ItemStack> items списка
         LinkedList<ItemStack> no_copy = new LinkedList<>();
         for (int v = 0; v < size; v++) {
             ItemStack item = items.get(randomGenerator.nextInt(size));
