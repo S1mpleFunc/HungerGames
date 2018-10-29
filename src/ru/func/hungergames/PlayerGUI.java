@@ -14,7 +14,7 @@ import java.util.List;
 
 public class PlayerGUI {
     public static void openPlayerGUI(Player p) {
-        //Инвентарь с живими игроками
+        //Инвентарь с живыми игроками
         Inventory i = Bukkit.createInventory(null, 45,"§b§lИгрушка наблюдателя");
 
         ItemStack skull = new ItemStack(Material.SKULL_ITEM);

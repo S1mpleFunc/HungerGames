@@ -42,7 +42,7 @@ public class HungerListener implements Listener {
         if (GameStatus.WAITING.isActive())
             e.getPlayer().teleport(Lobby.center);
         else if (GameStatus.STARTED.isActive() || GameStatus.STARTING.isActive()) {
-            //Выдача режима наблюдателя и заполнение инвенторя навигатором
+            //Выдача режима наблюдателя и заполнение инвентаря навигатаром
             e.getPlayer().setGameMode(GameMode.SPECTATOR);
             for (int i = 0; i < 9; i ++)
                 e.getPlayer().getInventory().setItem(i, HungerGames.compass);
@@ -75,7 +75,7 @@ public class HungerListener implements Listener {
                 }
             } catch (SQLException ex) {}
         }
-        //Удаление игрока из временногог регистра
+        //Удаление игрока из временного регистра
         HungerGames.playerStats.remove(p.getUniqueId());
     }
     @EventHandler
@@ -126,7 +126,7 @@ public class HungerListener implements Listener {
                 e.getInventory().addItem(new ItemStack(Material.POTION, 1, (short) 16389));
             else if (e.getPlayer().getInventory().contains(Material.BOW))
                 e.getInventory().addItem(new ItemStack(Material.ARROW, (int) (Math.random() * 11) + 0));
-            //Фиксировае открытия сундука
+            //Фиксирование открытия сундука
             openned_chests.add(e.getInventory().getLocation());
             e.setCancelled(false);
         }
@@ -179,7 +179,7 @@ public class HungerListener implements Listener {
     }
     private void chestSetter (LinkedList<ItemStack> items, Inventory inv, int size)
     {
-        //Заполняет сундук случайными НЕ повторяющими вещами, из LinkedList<ItemStack> items списка
+        //Заполняет сундук случайными НЕ повторяющимещя вещами, из LinkedList<ItemStack> items списка
         LinkedList<ItemStack> no_copy = new LinkedList<>();
         for (int v = 0; v < size; v++) {
             ItemStack item = items.get(randomGenerator.nextInt(size));
@@ -247,7 +247,7 @@ public class HungerListener implements Listener {
     public void onRespawn (PlayerRespawnEvent e)
     {
         if (!GameStatus.WAITING.isActive()) {
-            //Выдача режима наблюдателя и нафигатора
+            //Выдача режима наблюдателя и навигатора
             e.getPlayer().setGameMode(GameMode.SPECTATOR);
             for (int i = 0; i < 9; i ++)
                 e.getPlayer().getInventory().setItem(i, HungerGames.compass);

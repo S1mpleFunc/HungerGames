@@ -1,7 +1,7 @@
 package ru.func.hungergames;
 
 public class HungerPlayer {
-    //Создание класса хранящего всей статистики игрока
+    //Создание класса хранящего всю статистики игрока
     int kills;
     int deaths;
     int district;

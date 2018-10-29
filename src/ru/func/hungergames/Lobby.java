@@ -20,7 +20,7 @@ public class Lobby {
                 plugin.getConfig().getInt("lobby.y") + 0F,
                 plugin.getConfig().getInt("lobby.z") + 0.5F
         );
-        //Очистка инвентарей всех игроков, выдача режима выживания вмеи игрокам, телепортация всех к центру
+        //Очистка инвентарей всех игроков, выдача режима выживания всем игрокам, телепортация всех к центру
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.getInventory().clear();
             p.setGameMode(GameMode.SURVIVAL);
