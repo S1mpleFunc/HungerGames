@@ -17,6 +17,7 @@ public enum GameStatus {
         return active;
     }
     public void setActive() {
+        //Выключение всех статусов, кроме нужного
         for (GameStatus g : GameStatus.values())
             g.active = false;
         this.active = true;

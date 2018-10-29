@@ -25,24 +25,36 @@ public class HungerGames extends JavaPlugin {
     private ItemMeta compass_meta = compass.getItemMeta();
     static Statement statement;
 
+    public static ItemStack empty;
     public static ItemStack gold;
     public static ItemStack tp;
     public static ItemStack inv;
     @Override
     public void onEnable()
     {
+        registerConfig();
+
+        //Определение предметов, в компасе наблюдателя (кроме бумаги со статистикой(т. к. она не общая, а личная)), и серого стекла
         gold = getItem(Material.GOLD_INGOT, "§e§lСпонсировать игрока", getConfig().getString("lores.sponsor"));
         tp = getItem(Material.EYE_OF_ENDER, "§e§lТелепортироваться к игроку", getConfig().getString("lores.teleport"));
         inv = getItem(Material.CHEST, "§e§lИнвентарь игрока", getConfig().getString("lores.inventory"));
 
+        empty = new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) 15);
+        ItemMeta emptyMeta = empty.getItemMeta();
+        emptyMeta.setDisplayName("/");
+        empty.setItemMeta(emptyMeta);
+
         World world = Bukkit.getWorld(getConfig().getString("lobby.world"));
 
         manager = Bukkit.getScoreboardManager();
-        registerConfig();
+
         compass_meta.setDisplayName(getConfig().getString("compass.name"));
         compass.setItemMeta(compass_meta);
         scores.addAll(getConfig().getStringList("score"));
+        //Подключение обработчиков событий и команд
+        getCommand("center").setExecutor(new HungerCommands(this));
         Bukkit.getPluginManager().registerEvents(new HungerListener(this), this);
+        //Подкоючение к базе данных
         MySql base = new MySql(getConfig().getString("user"), getConfig().getString("password"), getConfig().getString("host"), getConfig().getString("database"), getConfig().getInt("port"));
         try {
             getLogger().info("[!] Connecting to DataBase.");
@@ -53,38 +65,31 @@ public class HungerGames extends JavaPlugin {
         {
             getLogger().info("[!] Connection exception.");
         }
+        //Загрузка, создание игрока
         for (Player p : Bukkit.getOnlinePlayers()) {
             loadStats(p, this);
             hashStats(p.getUniqueId());
             p.setFoodLevel(20);
         }
+        //Запуск лобби
         Lobby.waitLobby(this);
         toItemStack("random.bad_items", bad_items);
         toItemStack("random.good_items", good_items);
         toItemStack("random.food", food_items);
         updateScores(this, 0, 0, 0);
+        //Настройки мира
         world.getWorldBorder().setSize(getConfig().getInt("game.default_size"));
-
         Bukkit.setSpawnRadius(0);
         world.setAutoSave(false);
         world.setDifficulty(Difficulty.HARD);
         world.setMonsterSpawnLimit(0);
         world.getEntities().clear();
 
-        getCommand("center").setExecutor(new HungerCommands(this));
         getLogger().info(getConfig().getString("name") + " был запущен.");
-    }
-    @Override
-    public void onDisable ()
-    {
-        for (Location loc : HungerListener.openned_chests) {
-            Chest chest = (Chest) loc.getBlock().getState();
-            chest.getBlockInventory().clear();
-        }
-        HungerListener.openned_chests.clear();
     }
     public static void loadStats (Player p, HungerGames plugin)
     {
+        //Попытка загрузки и выведения информации о игроке
         try {
             ResultSet rs = statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + p.getUniqueId() + "';");
             if (!rs.next()) {
@@ -121,6 +126,7 @@ public class HungerGames extends JavaPlugin {
     }
     public static void updateScores (HungerGames plugin, int waiting, int chest, int death)
     {
+        //Обновление SCOREBOARD для каждого игрока
         for (Player p : Bukkit.getOnlinePlayers()) {
             Scoreboard board = manager.getNewScoreboard();
             Objective objective = board.registerNewObjective("scoreboard","dummy");
@@ -166,6 +172,7 @@ public class HungerGames extends JavaPlugin {
     }
     public static void hashStats (UUID uid)
     {
+        //Создание экземпляра класса HungerPlayer, для игрока с uuid ?= uid
         try {
             ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + uid + "';");
             if (rs.next()) {

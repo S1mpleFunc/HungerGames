@@ -15,6 +15,7 @@ public class GameStarter {
     public static LinkedList<Player> life_players = new LinkedList<>();
 
     public static void startGame (HungerGames plugin) {
+        // Проверка на онлайн, если людей не достаточно, перезапустить лобби
         int online = Bukkit.getOnlinePlayers().size();
         int people_need = plugin.getConfig().getInt("people_need");
         if (online < people_need) {
@@ -23,6 +24,7 @@ public class GameStarter {
             Lobby.waitLobby(plugin);
             return;
         }
+        //Начинаем игру
         GameStatus.STARTING.setActive();
         for (Player p : Bukkit.getOnlinePlayers()) {
             kills.put(p.getName(), 0);
@@ -33,6 +35,7 @@ public class GameStarter {
         }
         setLocation(plugin);
         HungerGames.updateScores(plugin, 0, 0, 0);
+        //Запуск игрового таймера
         new BukkitRunnable() {
             int time_for_starting = plugin.getConfig().getInt("game.starting_time");
             int time_for_chest = plugin.getConfig().getInt("chest.reload");
@@ -41,8 +44,10 @@ public class GameStarter {
             int death_size = plugin.getConfig().getInt("game.size");
             @Override
             public void run() {
+                //Смерть таймера если с барьером, что то не так
                 if (GameStatus.FINISHING.isActive())
                     this.cancel();
+                //Начало игры
                 if (time_for_starting == 0) {
                     Bukkit.broadcastMessage(plugin.getConfig().getString("game.start_message"));
                     HungerGames.sendTitle("[§a§l!§f]", "Игра Началась");
@@ -52,18 +57,20 @@ public class GameStarter {
                     Bukkit.broadcastMessage(plugin.getConfig().getString("game.starting_message") + time_for_starting + "!");
                 HungerGames.updateScores(plugin, time_for_starting, 0, 0);
                 time_for_starting = time_for_starting - 1;
-                // ИГРА НАЧАЛАСЬ
+
                 if (!GameStatus.STARTED.isActive())
                     return;
                 if (value_of_chest_replace == 0) {
                     death_time = death_time - 1;
                     if (death_time == 0) {
+                        //Начало последнего боя
                         setLocation(plugin);
                         HungerGames.sendTitle("[§c§l!§f]", "Последний бой");
                         Bukkit.broadcastMessage(plugin.getConfig().getString("game.fight_message"));
                         Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setCenter(Lobby.center);
                         Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setSize(death_size);
                     } else if (death_time < 0) {
+                        //Конец таймера
                         Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setSize(Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().getSize() - 1);
                         if (Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().getSize() == 1)
                             this.cancel();
@@ -74,6 +81,7 @@ public class GameStarter {
                 }
                 HungerGames.updateScores(plugin, 0, time_for_chest, 0);
                 if (time_for_chest == 0) {
+                    //Перезаполняем сундуки
                     time_for_chest = plugin.getConfig().getInt("chest.reload");
                     for (Location loc : HungerListener.openned_chests) {
                         Chest chest = (Chest) loc.getBlock().getState();

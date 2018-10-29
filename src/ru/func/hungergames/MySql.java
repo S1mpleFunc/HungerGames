@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class MySql extends Database {
-
+    //Класс хранящий инструменты для работы с MySql
     private final String user;
     private final String password;
     private final String host;
