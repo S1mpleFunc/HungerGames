@@ -50,7 +50,7 @@ public class HungerGames extends JavaPlugin {
         try {
             getLogger().info("[!] Connecting to DataBase.");
             statement = base.openConnection().createStatement();
-            statement.executeUpdate("CREATE TABLE IF NOT EXISTS `TEST` (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name TEXT, gold INT, district INT, kills INT, wins INT, deaths INT);");
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS `TEST` (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, uuid TEXT, gold INT, district INT, kills INT, wins INT, deaths INT);");
             getLogger().info("[!] Connected to DataBase.");
         } catch (ClassNotFoundException | SQLException e)
         {
@@ -77,14 +77,14 @@ public class HungerGames extends JavaPlugin {
     public static void loadStats (Player p, HungerGames plugin)
     {
         try {
-            ResultSet rs = statement.executeQuery("SELECT * FROM `TEST` WHERE name = '" + p.getName() + "';");
+            ResultSet rs = statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + p.getUniqueId() + "';");
             if (!rs.next()) {
-                statement.executeUpdate("INSERT INTO `TEST` (name, gold, district, kills, wins, deaths) VALUES('" + p.getName() + "', 0, 13, 0, 0, 1);");
+                statement.executeUpdate("INSERT INTO `TEST` (uuid, gold, district, kills, wins, deaths) VALUES('" + p.getUniqueId() + "', 0, 13, 0, 0, 1);");
                 p.sendMessage(plugin.getConfig().getString("profile.new"));
             }
             else
                 p.sendMessage(plugin.getConfig().getString("profile.connected"));
-            p.sendMessage("[§b!§f] §bЗапись: §f" + rs.getString("name")
+            p.sendMessage("[§b!§f] §bЗапись: §f" + p.getName()
                     + ", §bваш номер: §f" + rs.getString("id")
                     + "\nВсего убийств: §c§l" + rs.getInt("kills")
                     + "§f, побед: §e§l" + rs.getInt("wins")
@@ -131,7 +131,7 @@ public class HungerGames extends JavaPlugin {
             discores.add(objective.getScore(scores.get(1)));
             discores.add(objective.getScore(" "));
             try {
-                ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE name = '" + p.getName() + "';");
+                ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + p.getUniqueId() + "';");
                 if (rs.next()) {
                     if (!GameStatus.WAITING.isActive()) {
                         discores.set(0, objective.getScore(scores.get(0) + "§f(§e" + GameStarter.life_players.size() + "§f/§e" + Bukkit.getOnlinePlayers().size() + "§f)"));

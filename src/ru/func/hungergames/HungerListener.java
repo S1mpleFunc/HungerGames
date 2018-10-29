@@ -61,12 +61,12 @@ public class HungerListener implements Listener {
             if (!GameStarter.kills.containsKey(name) || GameStarter.kills.get(name).equals(0))
                 return;
             try {
-                ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE name = '" + name + "';");
+                ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + p.getUniqueId() + "';");
                 if (rs.next()) {
                     int new_kills = rs.getInt("kills") + GameStarter.kills.get(name);
                     int new_coins = rs.getInt("gold") + GameStarter.kills.get(name) * 5;
                     int new_deaths = rs.getInt("deaths") + 1;
-                    HungerGames.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', deaths = '" + new_deaths + "' WHERE name = '" + name + "';");
+                    HungerGames.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', deaths = '" + new_deaths + "' WHERE uuid = '" + p.getUniqueId() + "';");
                 }
             } catch (SQLException ex) {}
         }
@@ -202,17 +202,17 @@ public class HungerListener implements Listener {
         for (Player p : Bukkit.getOnlinePlayers()) {
             try {
                 String name = p.getName();
-                ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE name = '" + name + "';");
+                ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + p.getUniqueId() + "';");
                 if (rs.next()) {
                     int new_kills = rs.getInt("kills") + GameStarter.kills.get(name);
                     int new_coins = rs.getInt("gold") + GameStarter.kills.get(name) * 5;
                     int new_deaths = rs.getInt("deaths") + 1;
                     if (GameStarter.life_players.contains(p)) {
                         int new_wins = rs.getInt("wins") + 1;
-                        HungerGames.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', wins = '" + new_wins + "' WHERE name = '" + name + "';");
+                        HungerGames.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', wins = '" + new_wins + "' WHERE uuid = '" + p.getUniqueId() + "';");
                     }
                     else
-                        HungerGames.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', deaths = '" + new_deaths + "' WHERE name = '" + name + "';");
+                        HungerGames.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', deaths = '" + new_deaths + "' WHERE uuid = '" + p.getUniqueId() + "';");
                 }
             } catch (SQLException ex) {
                 ex.printStackTrace();

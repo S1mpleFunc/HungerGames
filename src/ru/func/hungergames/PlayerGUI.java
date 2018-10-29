@@ -75,7 +75,7 @@ public class PlayerGUI {
         ItemStack stats = new ItemStack(Material.PAPER);
         ItemMeta im = stats.getItemMeta();
         try {
-            ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE name = '" + l.getName() + "';");
+            ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + l.getUniqueId() + "';");
             if (rs.next()) {
                 lores.add("§fНомер: §l" + rs.getInt("id"));
                 lores.add("§fДистрикт: §l" + rs.getInt("district"));
