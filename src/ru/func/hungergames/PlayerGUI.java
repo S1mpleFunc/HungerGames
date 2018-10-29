@@ -8,8 +8,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -74,18 +72,16 @@ public class PlayerGUI {
         List<String> lores = new ArrayList<>();
         ItemStack stats = new ItemStack(Material.PAPER);
         ItemMeta im = stats.getItemMeta();
-        try {
-            ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + l.getUniqueId() + "';");
-            if (rs.next()) {
-                lores.add("§fНомер: §l" + rs.getInt("id"));
-                lores.add("§fДистрикт: §l" + rs.getInt("district"));
-                lores.add("§fПобед: §l" + rs.getInt("wins"));
-                lores.add("§fУбийств/Все время: §l" + rs.getInt("kills"));
-                lores.add("§fУбийств: §l" + GameStarter.kills.get(l.getName()));
-                lores.add("§fK/D: §l" + ((float) rs.getInt("kills") / (float) rs.getInt("deaths")));
-            }
-            im.setLore(lores);
-        } catch (SQLException e) {}
+
+        lores.add("§fДистрикт: §l" + HungerGames.playerStats.get(l.getUniqueId()).getDistrict());
+        lores.add("§fПобед: §l" + HungerGames.playerStats.get(l.getUniqueId()).getWins());
+        lores.add("§fДенариев: §l" + HungerGames.playerStats.get(l.getUniqueId()).getCoins());
+        lores.add("§fУбийств/Все время: §l" + HungerGames.playerStats.get(l.getUniqueId()).getKills());
+        lores.add("§fУбийств: §l" + GameStarter.kills.get(l.getName()));
+        lores.add("§fK/D: §l" + HungerGames.playerStats.get(l.getUniqueId()).getKD());
+
+        im.setLore(lores);
+
         im.setDisplayName("§e§lСтатистика игрока");
         stats.setItemMeta(im);
         for (int u = 0; u < 9; u++)

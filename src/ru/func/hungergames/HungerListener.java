@@ -34,6 +34,7 @@ public class HungerListener implements Listener {
     @EventHandler
     public void onJoin (PlayerJoinEvent e)
     {
+        HungerGames.hashStats(e.getPlayer().getUniqueId());
         if (GameStatus.WAITING.isActive()) {
             HungerGames.loadStats(e.getPlayer(), plugin);
             e.getPlayer().teleport(Lobby.center);
@@ -70,6 +71,7 @@ public class HungerListener implements Listener {
                 }
             } catch (SQLException ex) {}
         }
+        HungerGames.playerStats.remove(p.getUniqueId());
     }
     @EventHandler
     public void onMove (PlayerMoveEvent e)

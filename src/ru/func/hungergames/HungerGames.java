@@ -11,10 +11,8 @@ import org.bukkit.scoreboard.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+
 public class HungerGames extends JavaPlugin {
 
     static ScoreboardManager manager;
@@ -24,6 +22,7 @@ public class HungerGames extends JavaPlugin {
     public static LinkedList<ItemStack> food_items = new LinkedList<>();
     public static List<String> scores = new ArrayList<>();
     public static ItemStack compass = new ItemStack(Material.COMPASS);
+    public static HashMap<UUID, HungerPlayer> playerStats = new HashMap<>();
 
     private ItemMeta compass_meta = compass.getItemMeta();
     static Statement statement;
@@ -56,8 +55,10 @@ public class HungerGames extends JavaPlugin {
         {
             getLogger().info("[!] Connection exception.");
         }
-        for (Player p : Bukkit.getOnlinePlayers())
+        for (Player p : Bukkit.getOnlinePlayers()) {
             loadStats(p, this);
+            hashStats(p.getUniqueId());
+        }
         Lobby.waitLobby(this);
         toItemStack("random.bad_items", bad_items);
         toItemStack("random.good_items", good_items);
@@ -131,27 +132,19 @@ public class HungerGames extends JavaPlugin {
                 discores.add(objective.getScore(scores.get(4) + death));
             discores.add(objective.getScore(scores.get(1)));
             discores.add(objective.getScore(" "));
-            try {
-                ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + p.getUniqueId() + "';");
-                if (rs.next()) {
-                    if (!GameStatus.WAITING.isActive()) {
-                        discores.set(0, objective.getScore(scores.get(0) + "§f(§e" + GameStarter.life_players.size() + "§f/§e" + Bukkit.getOnlinePlayers().size() + "§f)"));
-                        if (GameStarter.kills.containsKey(p.getName()))
-                            discores.add(objective.getScore(scores.get(5) + GameStarter.kills.get(p.getName())));
-                    }
-                    else
-                        discores.add(objective.getScore(scores.get(10) + rs.getInt("kills")));
-                    discores.add(objective.getScore(scores.get(6) + rs.getInt("gold")));
-                    discores.add(objective.getScore(scores.get(7) + rs.getInt("wins")));
-                    discores.add(objective.getScore(scores.get(8) + rs.getInt("district")));
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } finally {
-                for (Score s : discores)
-                    s.setScore(discores.indexOf(s));
-                discores.clear();
-            }
+            if (!GameStatus.WAITING.isActive()) {
+                discores.set(0, objective.getScore(scores.get(0) + "§f(§e" + GameStarter.life_players.size() + "§f/§e" + Bukkit.getOnlinePlayers().size() + "§f)"));
+                if (GameStarter.kills.containsKey(p.getName()))
+                    discores.add(objective.getScore(scores.get(5) + GameStarter.kills.get(p.getName())));
+            } else
+                discores.add(objective.getScore(scores.get(10) + HungerGames.playerStats.get(p.getUniqueId()).getKills()));
+            discores.add(objective.getScore(scores.get(6) + HungerGames.playerStats.get(p.getUniqueId()).getCoins()));
+            discores.add(objective.getScore(scores.get(7) + HungerGames.playerStats.get(p.getUniqueId()).getWins()));
+            discores.add(objective.getScore(scores.get(8) + HungerGames.playerStats.get(p.getUniqueId()).getDistrict()));
+
+            for (Score s : discores)
+                s.setScore(discores.indexOf(s));
+            discores.clear();
             p.setScoreboard(board);
         }
     }
@@ -163,5 +156,20 @@ public class HungerGames extends JavaPlugin {
         im.setLore(Arrays.asList(lore));
         is.setItemMeta(im);
         return is;
+    }
+    public static void hashStats (UUID uid)
+    {
+        try {
+            ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + uid + "';");
+            if (rs.next()) {
+                HungerGames.playerStats.put(uid, new HungerPlayer(
+                        rs.getInt("kills"),
+                        rs.getInt("deaths"),
+                        rs.getInt("district"),
+                        rs.getInt("wins"),
+                        rs.getInt("gold")
+                ));
+            }
+        } catch (SQLException ex) {}
     }
 }
