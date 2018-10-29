@@ -65,6 +65,7 @@ public class HungerGames extends JavaPlugin {
         updateScores(this, 0, 0, 0);
         world.getWorldBorder().setSize(getConfig().getInt("game.default_size"));
 
+        Bukkit.setSpawnRadius(0);
         world.setAutoSave(false);
         world.setDifficulty(Difficulty.HARD);
         world.setMonsterSpawnLimit(0);
