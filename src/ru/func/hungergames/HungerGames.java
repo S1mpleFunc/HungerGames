@@ -1,5 +1,6 @@
 package ru.func.hungergames;
 
+import com.sun.istack.internal.NotNull;
 import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
 import org.bukkit.Material;
@@ -89,7 +90,7 @@ public class HungerGames extends JavaPlugin {
 
         getLogger().info(getConfig().getString("name") + " был запущен.");
     }
-    public static void loadStats (Player p, HungerGames plugin)
+    public static void loadStats (@NotNull Player p, HungerGames plugin)
     {
         //Попытка загрузки и выведения информации о игроке
         try {
@@ -111,7 +112,7 @@ public class HungerGames extends JavaPlugin {
             p.sendMessage(plugin.getConfig().getString("profile.exception"));
         }
     }
-    public static void sendTitle (String message, String label)
+    public static void sendTitle (@NotNull String message, @NotNull String label)
     {
         for (Player p : Bukkit.getOnlinePlayers())
             p.sendTitle(message, label);
@@ -163,7 +164,7 @@ public class HungerGames extends JavaPlugin {
             p.setScoreboard(board);
         }
     }
-    public static ItemStack getItem (Material material, String name, String lore)
+    public static ItemStack getItem (@NotNull Material material, @NotNull String name, @NotNull String lore)
     {
         ItemStack is = new ItemStack(material);
         ItemMeta im = is.getItemMeta();

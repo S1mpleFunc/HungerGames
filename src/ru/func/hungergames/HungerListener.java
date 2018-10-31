@@ -1,5 +1,6 @@
 package ru.func.hungergames;
 
+import com.sun.istack.internal.NotNull;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.GameMode;
@@ -179,7 +180,7 @@ public class HungerListener implements Listener {
         HungerGames.updateScores(plugin, 0, 0, 0);
         closeGame();
     }
-    private void chestSetter (LinkedList<ItemStack> items, Inventory inv, int size)
+    private void chestSetter (@NotNull LinkedList<ItemStack> items, @NotNull Inventory inv, int size)
     {
         //Заполняет сундук случайными НЕ повторяющимищя вещами, из LinkedList<ItemStack> items списка
         LinkedList<ItemStack> no_copy = new LinkedList<>();

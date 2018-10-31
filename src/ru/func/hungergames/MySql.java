@@ -1,5 +1,7 @@
 package ru.func.hungergames;
 
+import com.sun.istack.internal.NotNull;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -12,7 +14,7 @@ public class MySql extends Database {
     private final String database;
     private final int port;
 
-    MySql (String user, String password, String host, String database, int port)
+    MySql (@NotNull String user, @NotNull String password, @NotNull String host, @NotNull String database, int port)
     {
         this.user = user;
         this.password = password;

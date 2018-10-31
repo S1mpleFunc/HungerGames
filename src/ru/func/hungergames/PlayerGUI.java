@@ -1,5 +1,6 @@
 package ru.func.hungergames;
 
+import com.sun.istack.internal.NotNull;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -13,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PlayerGUI {
-    public static void openPlayerGUI(Player p) {
+    public static void openPlayerGUI(@NotNull Player p) {
         //Инвентарь с живыми игроками
         Inventory i = Bukkit.createInventory(null, 45,"§b§lИгрушка наблюдателя");
 
@@ -33,7 +34,7 @@ public class PlayerGUI {
         //Открытие игрока
         p.openInventory(i);
     }
-    private static void openVoteFunction (Player p, Player l)
+    private static void openVoteFunction (@NotNull Player p, @NotNull Player l)
     {
         Inventory i = Bukkit.createInventory(null, 27, l.getName());
 
@@ -64,7 +65,7 @@ public class PlayerGUI {
         //Открытие инвентаря
         p.openInventory(i);
     }
-    private static void openSponsoeMenu (Player p, Player l)
+    private static void openSponsoeMenu (@NotNull Player p, @NotNull Player l)
     {
         //НЕ ДОДЕЛАНО////////////////////////////////////////////////
         Inventory i = Bukkit.createInventory(null, 27, l.getName());
@@ -78,7 +79,7 @@ public class PlayerGUI {
         p.openInventory(i);
         ///////////////////////////////////////////////////////////////
     }
-    public static void teamGUIHandler (Player p, ItemStack item)
+    public static void teamGUIHandler (@NotNull Player p, @NotNull ItemStack item)
     {
         //Обработка возможных предметов
         if (GameStarter.life_players.contains(p))
