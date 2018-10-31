@@ -123,6 +123,7 @@ random.good_items:
     - 'BOW'
     - 'DIAMOND'
     - 'IRON_INGOT'
+    - 'FISHING_ROD'
 
     - 'IRON_HELMET'
     - 'IRON_CHESTPLATE'

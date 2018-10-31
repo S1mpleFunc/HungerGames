@@ -1,6 +1,9 @@
 package ru.func.hungergames;
-import org.bukkit.*;
-import org.bukkit.block.Chest;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Difficulty;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -33,7 +36,6 @@ public class HungerGames extends JavaPlugin {
     public void onEnable()
     {
         registerConfig();
-
         //Определение предметов, в компасе наблюдателя (кроме бумаги со статистикой(т. к. она не общая, а личная)), и серого стекла
         gold = getItem(Material.GOLD_INGOT, "§e§lСпонсировать игрока", getConfig().getString("lores.sponsor"));
         tp = getItem(Material.EYE_OF_ENDER, "§e§lТелепортироваться к игроку", getConfig().getString("lores.teleport"));
@@ -59,7 +61,7 @@ public class HungerGames extends JavaPlugin {
         try {
             getLogger().info("[!] Connecting to DataBase.");
             statement = base.openConnection().createStatement();
-            statement.executeUpdate("CREATE TABLE IF NOT EXISTS `TEST` (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, uuid TEXT, gold INT, district INT, kills INT, wins INT, deaths INT);");
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS `TEST` (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, uuid TEXT, name TEXT, gold INT, district INT, kills INT, wins INT, deaths INT);");
             getLogger().info("[!] Connected to DataBase.");
         } catch (ClassNotFoundException | SQLException e)
         {
@@ -93,7 +95,7 @@ public class HungerGames extends JavaPlugin {
         try {
             ResultSet rs = statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + p.getUniqueId() + "';");
             if (!rs.next()) {
-                statement.executeUpdate("INSERT INTO `TEST` (uuid, gold, district, kills, wins, deaths) VALUES('" + p.getUniqueId() + "', 0, 13, 0, 0, 1);");
+                statement.executeUpdate("INSERT INTO `TEST` (uuid, name, gold, district, kills, wins, deaths) VALUES('" + p.getUniqueId() + "', '" + p.getName() + "', 0, 13, 0, 0, 1);");
                 p.sendMessage(plugin.getConfig().getString("profile.new"));
             }
             else

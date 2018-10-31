@@ -1,4 +1,5 @@
 package ru.func.hungergames;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.GameMode;
@@ -23,6 +24,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.Random;
+
 public class HungerListener implements Listener {
 
     private HungerGames plugin;
@@ -206,7 +208,8 @@ public class HungerListener implements Listener {
         Bukkit.broadcastMessage(plugin.getConfig().getString("game.kills_message"));
         //Выведение списка убийств за игру
         for (Player p : Bukkit.getOnlinePlayers())
-            Bukkit.broadcastMessage("  *  " + p.getName() + " §fубил §c§l" + GameStarter.kills.get(p.getName()) + "§f игроков(а).");
+            if (GameStarter.kills.containsKey(p.getName()))
+                Bukkit.broadcastMessage("  *  " + p.getName() + " §fубил §c§l" + GameStarter.kills.get(p.getName()) + "§f игроков(а).");
         //Выведение имени победителя
         HungerGames.sendTitle("[§a!§f]", "Победа!");
         Bukkit.broadcastMessage("[§a!§f]§l " + winner.getName() + " §f победил!");

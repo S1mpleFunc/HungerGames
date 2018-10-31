@@ -18,11 +18,11 @@ public class HungerCommands implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         if (!(commandSender instanceof Player))
-            return true;
+            return false;
         if (!commandSender.isOp())
-            return true;
+            return false;
         if (strings.length < 1)
-            return true;
+            return false;
         try {
             if (Integer.parseInt(strings[0]) <= 0 || Integer.parseInt(strings[0]) > 100) {
                 commandSender.sendMessage("Некорректное число!");
