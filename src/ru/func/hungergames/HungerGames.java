@@ -1,6 +1,7 @@
 package ru.func.hungergames;
 
 import com.sun.istack.internal.NotNull;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
 import org.bukkit.Material;
@@ -10,10 +11,17 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.*;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+import java.util.HashMap;
+import java.util.Arrays;
 
 public class HungerGames extends JavaPlugin {
 
@@ -101,16 +109,14 @@ public class HungerGames extends JavaPlugin {
             }
             else
                 p.sendMessage(plugin.getConfig().getString("profile.connected"));
+
             p.sendMessage("[§b!§f] §bЗапись: §f" + p.getName()
                     + ", §bваш номер: §f" + rs.getString("id")
                     + "\nВсего убийств: §c§l" + rs.getInt("kills")
                     + "§f, побед: §e§l" + rs.getInt("wins")
                     + "§f, k/d: §l" + ((float) rs.getInt("kills") / (float) rs.getInt("deaths"))
             );
-        } catch (SQLException ex)
-        {
-            p.sendMessage(plugin.getConfig().getString("profile.exception"));
-        }
+        } catch (SQLException ex) { }
     }
     public static void sendTitle (@NotNull String message, @NotNull String label)
     {

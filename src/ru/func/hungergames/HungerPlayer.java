@@ -7,6 +7,7 @@ public class HungerPlayer {
     int district;
     int wins;
     int coins;
+
     public HungerPlayer (int kills, int deaths, int district, int wins, int coins)
     {
         this.kills = kills;

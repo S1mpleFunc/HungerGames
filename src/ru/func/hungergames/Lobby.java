@@ -21,11 +21,11 @@ public class Lobby {
                 plugin.getConfig().getInt("lobby.z") + 0.5F
         );
         //Очистка инвентарей всех игроков, выдача режима выживания всем игрокам, телепортация всех к центру
-        for (Player p : Bukkit.getOnlinePlayers()) {
+        Bukkit.getOnlinePlayers().stream().forEach(p -> {
             p.getInventory().clear();
             p.setGameMode(GameMode.SURVIVAL);
             p.teleport(center);
-        }
+        });
         //Работа с миром
         Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setCenter(center);
         Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setSize(plugin.getConfig().getInt("game.default_size"));
