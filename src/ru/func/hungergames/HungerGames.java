@@ -124,8 +124,7 @@ public class HungerGames extends JavaPlugin {
     }
     private void toItemStack (String s, LinkedList<ItemStack> llist)
     {
-        for (String d : getConfig().getStringList(s))
-            llist.add(new ItemStack(Material.valueOf(d)));
+        getConfig().getStringList(s).stream().forEach(d -> llist.add(new ItemStack(Material.valueOf(d))));
     }
     public static void updateScores (HungerGames plugin, int waiting, int chest, int death)
     {

@@ -128,7 +128,7 @@ public class HungerListener implements Listener {
             if (e.getPlayer().getHealth() < 7)
                 e.getInventory().addItem(new ItemStack(Material.POTION, 1, (short) 16389));
             else if (e.getPlayer().getInventory().contains(Material.BOW))
-                e.getInventory().addItem(new ItemStack(Material.ARROW, (int) (Math.random() * 11) + 0));
+                e.getInventory().addItem(new ItemStack(Material.ARROW, (int) (Math.random() * 6)));
             //Фиксирование открытия сундука
             openned_chests.add(e.getInventory().getLocation());
             e.setCancelled(false);
@@ -199,18 +199,16 @@ public class HungerListener implements Listener {
             return;
         //Завершение игры
         //Очистка открытых сундуков
-        for (Location loc : HungerListener.openned_chests) {
+        HungerListener.openned_chests.stream().forEach(loc -> {
             Chest chest = (Chest) loc.getBlock().getState();
             chest.getBlockInventory().clear();
-        }
+        });
         Player winner = GameStarter.life_players.get(0);
         GameStatus.FINISHING.setActive();
         saveStats();
         Bukkit.broadcastMessage(plugin.getConfig().getString("game.kills_message"));
         //Выведение списка убийств за игру
-        for (Player p : Bukkit.getOnlinePlayers())
-            if (GameStarter.kills.containsKey(p.getName()))
-                Bukkit.broadcastMessage("  *  " + p.getName() + " §fубил §c§l" + GameStarter.kills.get(p.getName()) + "§f игроков(а).");
+        Bukkit.getOnlinePlayers().stream().filter(p -> GameStarter.kills.containsKey(p.getName())).forEach(p -> Bukkit.broadcastMessage("  *  " + p.getName() + " §fубил §c§l" + GameStarter.kills.get(p.getName()) + "§f игроков(а)."));
         //Выведение имени победителя
         HungerGames.sendTitle("[§a!§f]", "Победа!");
         Bukkit.broadcastMessage("[§a!§f]§l " + winner.getName() + " §f победил!");
