@@ -6,6 +6,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Creature;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -27,20 +29,24 @@ public class HungerGames extends JavaPlugin {
 
     static ScoreboardManager manager;
 
-    public static LinkedList<ItemStack> bad_items = new LinkedList<>();
-    public static LinkedList<ItemStack> good_items = new LinkedList<>();
-    public static LinkedList<ItemStack> food_items = new LinkedList<>();
-    public static List<String> scores = new ArrayList<>();
-    public static ItemStack compass = new ItemStack(Material.COMPASS);
-    public static HashMap<UUID, HungerPlayer> playerStats = new HashMap<>();
+    public LinkedList<ItemStack> bad_items = new LinkedList<>();
+    public LinkedList<ItemStack> good_items = new LinkedList<>();
+    public LinkedList<ItemStack> food_items = new LinkedList<>();
+    public List<String> scores = new ArrayList<>();
+    public ItemStack compass = new ItemStack(Material.COMPASS);
+    public HashMap<UUID, HungerPlayer> playerStats = new HashMap<>();
 
     private ItemMeta compass_meta = compass.getItemMeta();
-    static Statement statement;
+    Statement statement;
 
-    public static ItemStack empty;
-    public static ItemStack gold;
-    public static ItemStack tp;
-    public static ItemStack inv;
+    public ItemStack empty;
+    public ItemStack gold;
+    public ItemStack tp;
+    public ItemStack inv;
+
+    GameStarter gameStarter = new GameStarter();
+    Lobby lobby = new Lobby();
+
     @Override
     public void onEnable()
     {
@@ -79,18 +85,17 @@ public class HungerGames extends JavaPlugin {
         //Загрузка, создание игрока
         for (Player p : Bukkit.getOnlinePlayers()) {
             loadStats(p, this);
-            hashStats(p.getUniqueId());
-            p.setFoodLevel(20);
+            hashStats(p.getUniqueId(), this);
         }
         //Запуск лобби
-        Lobby.waitLobby(this);
+        lobby.waitLobby(this);
         toItemStack("random.bad_items", bad_items);
         toItemStack("random.good_items", good_items);
         toItemStack("random.food", food_items);
         updateScores(this, 0, 0, 0);
         //Настройки мира
-        world.getWorldBorder().setSize(getConfig().getInt("game.default_size"));
         Bukkit.setSpawnRadius(0);
+        world.getWorldBorder().setSize(getConfig().getInt("game.default_size"));
         world.setAutoSave(false);
         world.setDifficulty(Difficulty.HARD);
         world.setMonsterSpawnLimit(0);
@@ -98,7 +103,13 @@ public class HungerGames extends JavaPlugin {
 
         getLogger().info(getConfig().getString("name") + " был запущен.");
     }
-    public static void loadStats (@NotNull Player p, HungerGames plugin)
+
+    @Override
+    public void onDisable() {
+        Bukkit.getWorld(getConfig().getString("lobby.world")).getEntities().stream().filter(x -> x instanceof Item || x instanceof Creature).forEach(x -> x.remove());
+    }
+
+    public void loadStats (@NotNull Player p, HungerGames plugin)
     {
         //Попытка загрузки и выведения информации о игроке
         try {
@@ -118,7 +129,7 @@ public class HungerGames extends JavaPlugin {
             );
         } catch (SQLException ex) { }
     }
-    public static void sendTitle (@NotNull String message, @NotNull String label)
+    public void sendTitle (@NotNull String message, @NotNull String label)
     {
         for (Player p : Bukkit.getOnlinePlayers())
             p.sendTitle(message, label);
@@ -132,7 +143,7 @@ public class HungerGames extends JavaPlugin {
     {
         getConfig().getStringList(s).stream().forEach(d -> llist.add(new ItemStack(Material.valueOf(d))));
     }
-    public static void updateScores (HungerGames plugin, int waiting, int chest, int death)
+    public void updateScores (HungerGames plugin, int waiting, int chest, int death)
     {
         //Обновление SCOREBOARD для каждого игрока
         for (Player p : Bukkit.getOnlinePlayers()) {
@@ -154,14 +165,14 @@ public class HungerGames extends JavaPlugin {
             discores.add(objective.getScore(scores.get(1)));
             discores.add(objective.getScore(" "));
             if (!GameStatus.WAITING.isActive()) {
-                discores.set(0, objective.getScore(scores.get(0) + "§f(§e" + GameStarter.life_players.size() + "§f/§e" + Bukkit.getOnlinePlayers().size() + "§f)"));
-                if (GameStarter.kills.containsKey(p.getName()))
-                    discores.add(objective.getScore(scores.get(5) + GameStarter.kills.get(p.getName())));
+                discores.set(0, objective.getScore(scores.get(0) + "§f(§e" + gameStarter.life_players.size() + "§f/§e" + Bukkit.getOnlinePlayers().size() + "§f)"));
+                if (gameStarter.kills.containsKey(p.getName()))
+                    discores.add(objective.getScore(scores.get(5) + gameStarter.kills.get(p.getName())));
             } else
-                discores.add(objective.getScore(scores.get(10) + HungerGames.playerStats.get(p.getUniqueId()).getKills()));
-            discores.add(objective.getScore(scores.get(6) + HungerGames.playerStats.get(p.getUniqueId()).getCoins()));
-            discores.add(objective.getScore(scores.get(7) + HungerGames.playerStats.get(p.getUniqueId()).getWins()));
-            discores.add(objective.getScore(scores.get(8) + HungerGames.playerStats.get(p.getUniqueId()).getDistrict()));
+                discores.add(objective.getScore(scores.get(10) + plugin.playerStats.get(p.getUniqueId()).getKills()));
+            discores.add(objective.getScore(scores.get(6) + plugin.playerStats.get(p.getUniqueId()).getCoins()));
+            discores.add(objective.getScore(scores.get(7) + plugin.playerStats.get(p.getUniqueId()).getWins()));
+            discores.add(objective.getScore(scores.get(8) + plugin.playerStats.get(p.getUniqueId()).getDistrict()));
 
             for (Score s : discores)
                 s.setScore(discores.indexOf(s));
@@ -169,7 +180,7 @@ public class HungerGames extends JavaPlugin {
             p.setScoreboard(board);
         }
     }
-    public static ItemStack getItem (@NotNull Material material, @NotNull String name, @NotNull String lore)
+    public ItemStack getItem (@NotNull Material material, @NotNull String name, @NotNull String lore)
     {
         ItemStack is = new ItemStack(material);
         ItemMeta im = is.getItemMeta();
@@ -178,13 +189,13 @@ public class HungerGames extends JavaPlugin {
         is.setItemMeta(im);
         return is;
     }
-    public static void hashStats (UUID uid)
+    public void hashStats (@NotNull UUID uid, HungerGames plugin)
     {
         //Создание экземпляра класса HungerPlayer, для игрока с uuid ?= uid
         try {
-            ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + uid + "';");
+            ResultSet rs = plugin.statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + uid + "';");
             if (rs.next()) {
-                HungerGames.playerStats.put(uid, new HungerPlayer(
+                plugin.playerStats.put(uid, new HungerPlayer(
                         rs.getInt("kills"),
                         rs.getInt("deaths"),
                         rs.getInt("district"),

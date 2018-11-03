@@ -25,6 +25,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -33,24 +34,29 @@ public class HungerListener implements Listener {
     private HungerGames plugin;
     public HungerListener (HungerGames hg) { plugin = hg; }
 
-    public static LinkedList<Location> openned_chests = new LinkedList<>();
+    public LinkedList<Location> openned_chests = new LinkedList<>();
     private Random randomGenerator = new Random();
+
+    GameStarter gameStarter = new GameStarter();
+    PlayerGUI playerGUI = new PlayerGUI();
 
     @EventHandler
     public void onJoin (PlayerJoinEvent e)
     {
         //Выполнение первичных функций с игроком
-        HungerGames.loadStats(e.getPlayer(), plugin);
-        HungerGames.hashStats(e.getPlayer().getUniqueId());
-        HungerGames.updateScores(plugin, 0, 0, 0);
-
-        if (GameStatus.WAITING.isActive())
+        plugin.loadStats(e.getPlayer(), plugin);
+        plugin.hashStats(e.getPlayer().getUniqueId(), plugin);
+        plugin.updateScores(plugin, 0, 0, 0);
+        e.getPlayer().getInventory().clear();
+        if (GameStatus.WAITING.isActive()) {
             e.getPlayer().teleport(Lobby.center);
+            e.getPlayer().setGameMode(GameMode.SURVIVAL);
+        }
         else if (GameStatus.STARTED.isActive() || GameStatus.STARTING.isActive()) {
             //Выдача режима наблюдателя и заполнение инвентаря навигатаром
             e.getPlayer().setGameMode(GameMode.SPECTATOR);
             for (int i = 0; i < 9; i ++)
-                e.getPlayer().getInventory().setItem(i, HungerGames.compass);
+                e.getPlayer().getInventory().setItem(i, plugin.compass);
         }
         e.setJoinMessage(plugin.getConfig().getString("event.join") + "§l" + e.getPlayer().getName());
     }
@@ -62,26 +68,26 @@ public class HungerListener implements Listener {
         e.setQuitMessage(plugin.getConfig().getString("event.quit") + "§l" + name);
         p.setGameMode(GameMode.SURVIVAL);
         if (GameStatus.STARTED.isActive() || GameStatus.STARTING.isActive()) {
-            if (GameStarter.life_players.contains(p))
-                GameStarter.life_players.remove(p);
+            if (gameStarter.life_players.contains(p))
+                gameStarter.life_players.remove(p);
             //Сообщение выхода, если игра начинается или началась
-            e.setQuitMessage("[§b!§f] §l" + name + " §fвышел из игры. В живых осталось(ся): §l" + GameStarter.life_players.size());
+            e.setQuitMessage("[§b!§f] §l" + name + " §fвышел из игры. В живых осталось(ся): §l" + gameStarter.life_players.size());
             closeGame();
             //Попытка обновления данных игрока, если у него убийсва != 0
-            if (!GameStarter.kills.containsKey(name) || GameStarter.kills.get(name).equals(0))
+            if (!gameStarter.kills.containsKey(name) || gameStarter.kills.get(name).equals(0))
                 return;
             try {
-                ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + p.getUniqueId() + "';");
+                ResultSet rs = plugin.statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + p.getUniqueId() + "';");
                 if (rs.next()) {
-                    int new_kills = rs.getInt("kills") + GameStarter.kills.get(name);
-                    int new_coins = rs.getInt("gold") + GameStarter.kills.get(name) * 5;
+                    int new_kills = rs.getInt("kills") + gameStarter.kills.get(name);
+                    int new_coins = rs.getInt("gold") + gameStarter.kills.get(name) * 5;
                     int new_deaths = rs.getInt("deaths") + 1;
-                    HungerGames.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', deaths = '" + new_deaths + "' WHERE uuid = '" + p.getUniqueId() + "';");
+                    plugin.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', deaths = '" + new_deaths + "' WHERE uuid = '" + p.getUniqueId() + "';");
                 }
             } catch (SQLException ex) {}
         }
         //Удаление игрока из временного регистра
-        HungerGames.playerStats.remove(p.getUniqueId());
+        plugin.playerStats.remove(p.getUniqueId());
     }
     @EventHandler
     public void onMove (PlayerMoveEvent e)
@@ -108,28 +114,26 @@ public class HungerListener implements Listener {
         if (e.getInventory().getHolder() instanceof Chest || e.getInventory().getHolder() instanceof DoubleChest) {
             if (openned_chests.contains(e.getInventory().getLocation()))
                 return;
-            if (!GameStarter.life_players.contains(e.getPlayer()))
+            if (!gameStarter.life_players.contains(e.getPlayer()))
                 return;
             String name = e.getPlayer().getName();
-            GameStarter.open_chest.replace(name, GameStarter.open_chest.get(name) + 1);
+            gameStarter.open_chest.replace(name, gameStarter.open_chest.get(name) + 1);
 
             int min = plugin.getConfig().getInt("range.min");
             int max = plugin.getConfig().getInt("range.max");
             //Заполнение сундука псевдослучайными вещами
             int random_size = (int) (Math.random() * ((max - min) + 1)) + min;
-            if (GameStarter.open_chest.get(name) % 4 == 0) {
+            if (gameStarter.open_chest.get(name) % 4 == 0) {
                 //Если номер открытого игроком сундука кратен четырем, то лут хороший
-                chestSetter(HungerGames.good_items, e.getInventory(), random_size);
-                GameStarter.open_chest.replace(name, 0);
+                chestSetter(plugin.good_items, e.getInventory(), random_size);
+                gameStarter.open_chest.replace(name, 0);
             } else {
                 //По умолчанию лут - плохой
-                chestSetter(HungerGames.bad_items, e.getInventory(), random_size);
-                e.getInventory().addItem(HungerGames.food_items.get(randomGenerator.nextInt(HungerGames.food_items.size())));
+                chestSetter(plugin.bad_items, e.getInventory(), random_size);
+                e.getInventory().addItem(plugin.food_items.get(randomGenerator.nextInt(plugin.food_items.size())));
             }
             //Возможное добавление личных предметов, по особым признакам
-            if (e.getPlayer().getHealth() < 7)
-                e.getInventory().addItem(new ItemStack(Material.POTION, 1, (short) 16389));
-            else if (e.getPlayer().getInventory().contains(Material.BOW))
+            if (e.getPlayer().getInventory().contains(Material.BOW))
                 e.getInventory().addItem(new ItemStack(Material.ARROW, (int) (Math.random() * 6)));
             //Фиксирование открытия сундука
             openned_chests.add(e.getInventory().getLocation());
@@ -143,7 +147,7 @@ public class HungerListener implements Listener {
             return;
         if (e.getPlayer().getItemInHand().getType().equals(Material.COMPASS))
             //Открытие меню наблюдателя
-            PlayerGUI.openPlayerGUI(e.getPlayer());
+            playerGUI.openPlayerGUI(plugin, e.getPlayer());
     }
     @EventHandler
     public void onClick (InventoryClickEvent e)
@@ -158,7 +162,7 @@ public class HungerListener implements Listener {
             return;
         }
         //Обработка действия по выбранному предмету
-        PlayerGUI.teamGUIHandler(p, item);
+        playerGUI.teamGUIHandler(plugin, p, item);
         e.setCancelled(true);
     }
     // При убийстве
@@ -166,20 +170,20 @@ public class HungerListener implements Listener {
     public void onDeath (PlayerDeathEvent e) {
         Player death = e.getEntity();
         Player killer = death.getKiller();
-        if (GameStarter.life_players.contains(death))
+        if (gameStarter.life_players.contains(death))
             //Удаление игрока из живых
-            GameStarter.life_players.remove(death);
+            gameStarter.life_players.remove(death);
         try {
             //Если игрока убил другой игрок
-            e.setDeathMessage("[§b!§f] §l" + killer.getName() + " §fубил §l" + death.getName() + "§f. В живых осталось(ся): §l" + GameStarter.life_players.size());
-            GameStarter.kills.replace(killer.getName(), GameStarter.kills.get(killer.getName()) + 1);
+            e.setDeathMessage("[§b!§f] §l" + killer.getName() + " §fубил §l" + death.getName() + "§f. В живых осталось(ся): §l" + gameStarter.life_players.size());
+            gameStarter.kills.replace(killer.getName(), gameStarter.kills.get(killer.getName()) + 1);
             killer.setFoodLevel(20);
         } catch (NullPointerException ex)
         {
             //Если игрок умер сам
-            e.setDeathMessage("[§b!§f] §l" + death.getName() + " §fумер. В живых осталось(ся): §l" + GameStarter.life_players.size());
+            e.setDeathMessage("[§b!§f] §l" + death.getName() + " §fумер. В живых осталось(ся): §l" + gameStarter.life_players.size());
         }
-        HungerGames.updateScores(plugin, 0, 0, 0);
+        plugin.updateScores(plugin, 0, 0, 0);
         closeGame();
     }
     private void chestSetter (@NotNull LinkedList<ItemStack> items, @NotNull Inventory inv, int size)
@@ -197,22 +201,22 @@ public class HungerListener implements Listener {
     }
     private void closeGame ()
     {
-        if (GameStarter.life_players.size() != 1)
+        if (gameStarter.life_players.size() != 1)
             return;
         //Завершение игры
         //Очистка открытых сундуков
-        HungerListener.openned_chests.stream().forEach(loc -> {
+        for (Location loc : openned_chests) {
             Chest chest = (Chest) loc.getBlock().getState();
             chest.getBlockInventory().clear();
-        });
-        Player winner = GameStarter.life_players.get(0);
+        }
+        Player winner = gameStarter.life_players.get(0);
         GameStatus.FINISHING.setActive();
         saveStats();
         Bukkit.broadcastMessage(plugin.getConfig().getString("game.kills_message"));
         //Выведение списка убийств за игру
-        Bukkit.getOnlinePlayers().stream().filter(p -> GameStarter.kills.containsKey(p.getName())).forEach(p -> Bukkit.broadcastMessage("  *  " + p.getName() + " §fубил §c§l" + GameStarter.kills.get(p.getName()) + "§f игроков(а)."));
+        Bukkit.getOnlinePlayers().stream().filter(p -> gameStarter.kills.containsKey(p.getName()) && gameStarter.kills.get(p.getName()) != 0).forEach(p -> Bukkit.broadcastMessage("  *  " + p.getName() + " §fубил §c§l" + gameStarter.kills.get(p.getName()) + "§f игроков(а)."));
         //Выведение имени победителя
-        HungerGames.sendTitle("[§a!§f]", "Победа!");
+        plugin.sendTitle("[§a!§f]", "Победа!");
         Bukkit.broadcastMessage("[§a!§f]§l " + winner.getName() + " §f победил!");
         //Запуск таймера для перезагрузки
         new BukkitRunnable() {
@@ -220,7 +224,7 @@ public class HungerListener implements Listener {
             @Override
             public void run() {
                 if (end_time == 0)
-                    Bukkit.reload();
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "restart");
                 Bukkit.broadcastMessage(plugin.getConfig().getString("game.end_message") + end_time);
                 end_time = end_time - 1;
             }
@@ -231,17 +235,17 @@ public class HungerListener implements Listener {
         for (Player p : Bukkit.getOnlinePlayers()) {
             try {
                 String name = p.getName();
-                ResultSet rs = HungerGames.statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + p.getUniqueId() + "';");
+                ResultSet rs = plugin.statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + p.getUniqueId() + "';");
                 if (rs.next()) {
-                    int new_kills = rs.getInt("kills") + GameStarter.kills.get(name);
-                    int new_coins = rs.getInt("gold") + GameStarter.kills.get(name) * 5;
+                    int new_kills = rs.getInt("kills") + gameStarter.kills.get(name);
+                    int new_coins = rs.getInt("gold") + gameStarter.kills.get(name) * 5;
                     int new_deaths = rs.getInt("deaths") + 1;
-                    if (GameStarter.life_players.contains(p)) {
+                    if (gameStarter.life_players.contains(p)) {
                         int new_wins = rs.getInt("wins") + 1;
-                        HungerGames.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', wins = '" + new_wins + "' WHERE uuid = '" + p.getUniqueId() + "';");
+                        plugin.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', wins = '" + new_wins + "' WHERE uuid = '" + p.getUniqueId() + "';");
                     }
                     else
-                        HungerGames.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', deaths = '" + new_deaths + "' WHERE uuid = '" + p.getUniqueId() + "';");
+                        plugin.statement.executeUpdate("UPDATE `TEST` SET kills ='" + new_kills + "', gold = '" + new_coins + "', deaths = '" + new_deaths + "' WHERE uuid = '" + p.getUniqueId() + "';");
                 }
             } catch (SQLException | NullPointerException ex) {
             }
@@ -254,7 +258,7 @@ public class HungerListener implements Listener {
             //Выдача режима наблюдателя и навигатора
             e.getPlayer().setGameMode(GameMode.SPECTATOR);
             for (int i = 0; i < 9; i ++)
-                e.getPlayer().getInventory().setItem(i, HungerGames.compass);
+                e.getPlayer().getInventory().setItem(i, plugin.compass);
         }
     }
     // ОТМЕНЕННЫЕ

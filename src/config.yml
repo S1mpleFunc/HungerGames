@@ -13,7 +13,6 @@ port: 3306
 
 profile.new: '[§b!§f] Новый профиль был создан.'
 profile.connected: '[§a!§f] Ваш профиль был загружен.'
-profile.exception: '[§c!§f] Что то пошло не так... Ошибка номер: 1.'
 
 # Lobby Values
 
@@ -26,7 +25,7 @@ end_time: 15
 # Lores
 
 lores.sponsor: '§fНЕ ДОСТУПНО'
-lores.chance: '§fПосмотреть вероятность победы\n§fНЕ ДОСТУПНО'
+lores.chance: '§fПосмотреть вероятность победы'
 lores.teleport: '§fПеремещение к выбранному игроку.'
 lores.inventory: '§fПосмотреть инвентарь игрока.'
 
