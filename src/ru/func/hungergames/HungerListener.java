@@ -34,7 +34,7 @@ public class HungerListener implements Listener {
     private HungerGames plugin;
     public HungerListener (HungerGames hg) { plugin = hg; }
 
-    public LinkedList<Location> openned_chests = new LinkedList<>();
+    public static LinkedList<Location> openned_chests = new LinkedList<>();
     private Random randomGenerator = new Random();
 
     GameStarter gameStarter = new GameStarter();
