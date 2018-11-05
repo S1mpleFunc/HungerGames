@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.Potion;
 import org.bukkit.scoreboard.*;
 
 import java.sql.ResultSet;
@@ -32,6 +33,8 @@ public class HungerGames extends JavaPlugin {
     public LinkedList<ItemStack> bad_items = new LinkedList<>();
     public LinkedList<ItemStack> good_items = new LinkedList<>();
     public LinkedList<ItemStack> food_items = new LinkedList<>();
+    public LinkedList<ItemStack> potion_items = new LinkedList<>();
+
     public List<String> scores = new ArrayList<>();
     public ItemStack compass = new ItemStack(Material.COMPASS);
     public HashMap<UUID, HungerPlayer> playerStats = new HashMap<>();
@@ -92,6 +95,8 @@ public class HungerGames extends JavaPlugin {
         toItemStack("random.bad_items", bad_items);
         toItemStack("random.good_items", good_items);
         toItemStack("random.food", food_items);
+        getConfig().getIntegerList("random.potion_items").forEach(x -> potion_items.add(new ItemStack(Material.POTION, 1, (short) (int) x)));
+
         updateScores(this, 0, 0, 0);
         //Настройки мира
         Bukkit.setSpawnRadius(0);

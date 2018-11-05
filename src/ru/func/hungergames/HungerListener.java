@@ -137,13 +137,13 @@ public class HungerListener implements Listener {
             int max = plugin.getConfig().getInt("range.max");
             //Заполнение сундука псевдослучайными вещами
             int random_size = (int) (Math.random() * ((max - min) + 1)) + min;
-            if (gameStarter.open_chest.get(name) % 4 == 0) {
+            if (gameStarter.open_chest.get(name) % 5 == 0) {
                 //Если номер открытого игроком сундука кратен четырем, то лут хороший
-                chestSetter(plugin.good_items, e.getInventory(), random_size);
+                chestSetter(plugin.good_items, e.getInventory(), random_size, name);
                 gameStarter.open_chest.replace(name, 0);
             } else {
                 //По умолчанию лут - плохой
-                chestSetter(plugin.bad_items, e.getInventory(), random_size);
+                chestSetter(plugin.bad_items, e.getInventory(), random_size, name);
                 e.getInventory().addItem(plugin.food_items.get(randomGenerator.nextInt(plugin.food_items.size())));
             }
             //Возможное добавление личных предметов, по особым признакам
@@ -202,9 +202,12 @@ public class HungerListener implements Listener {
         plugin.updateScores(plugin, 0, 0, 0);
         closeGame();
     }
-    private void chestSetter (@NotNull LinkedList<ItemStack> items, @NotNull Inventory inv, int size)
+    private void chestSetter (@NotNull LinkedList<ItemStack> items, @NotNull Inventory inv, int size, String name)
     {
         inv.clear();
+        //Добавление в каждый 2 сундук случайного зелья
+        if (gameStarter.open_chest.get(name) % 2 == 0)
+            inv.setItem(randomGenerator.nextInt(27), plugin.potion_items.get(randomGenerator.nextInt(plugin.potion_items.size())));
         //Заполняет сундук случайными НЕ повторяющимищя вещами, из LinkedList<ItemStack> items списка
         LinkedList<ItemStack> no_copy = new LinkedList<>();
         for (int v = 0; v < size; v++) {

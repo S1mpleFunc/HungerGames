@@ -141,3 +141,6 @@ random.good_items:
 
     - 'GOLDEN_APPLE'
     - 'GOLDEN_CARROT'
+random.potion_items:
+    - 8197
+    - 8200
