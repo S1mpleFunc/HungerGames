@@ -8,11 +8,11 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -90,19 +90,33 @@ public class HungerListener implements Listener {
         plugin.playerStats.remove(p.getUniqueId());
     }
     @EventHandler
-    public void onMove (PlayerMoveEvent e)
-    {
-        if (!GameStatus.STARTING.isActive())
-            return;
-        //Плавное возвращение игрока на блок
-        Location from = e.getFrom();
-        Location to = e.getTo();
-        double x = Math.floor(from.getX());
-        double z = Math.floor(from.getZ());
-        if (Math.floor(to.getX()) != x || Math.floor(to.getZ()) != z) {
-            x += .5;
-            z += .5;
-            e.getPlayer().teleport(new Location(from.getWorld(), x, from.getY(), z, from.getYaw(), from.getPitch()));
+    public void onMove (PlayerMoveEvent e) {
+        Player p = e.getPlayer();
+        if (GameStatus.STARTING.isActive()) {
+            //Плавное возвращение игрока на блок
+            Location from = e.getFrom();
+            Location to = e.getTo();
+            double x = Math.floor(from.getX());
+            double z = Math.floor(from.getZ());
+            if (Math.floor(to.getX()) != x || Math.floor(to.getZ()) != z) {
+                x += .5;
+                z += .5;
+                e.getPlayer().teleport(new Location(from.getWorld(), x, from.getY(), z, from.getYaw(), from.getPitch()));
+            }
+        }
+        //Обновление компасов
+        if (GameStatus.STARTED.isActive()) {
+            if (!p.getInventory().contains(Material.COMPASS))
+                return;
+            HungerListener listener = new HungerListener(plugin);
+            Player target = listener.getNearestPlayer(p);
+            if (target == null)
+                return;
+            p.setCompassTarget(target.getLocation());
+            if (target.getLocation().distance(p.getLocation()) < 101) {
+                double xp = target.getLocation().distance(p.getLocation());
+                p.setExp((float) (xp % 100) / 100);
+            }
         }
     }
     @EventHandler
@@ -145,9 +159,11 @@ public class HungerListener implements Listener {
     {
         if (GameStatus.WAITING.isActive())
             return;
-        if (e.getPlayer().getItemInHand().getType().equals(Material.COMPASS))
-            //Открытие меню наблюдателя
-            playerGUI.openPlayerGUI(plugin, e.getPlayer());
+        Player p = e.getPlayer();
+        if (p.getItemInHand().getType().equals(Material.COMPASS))
+            if (p.getGameMode().equals(GameMode.SPECTATOR))
+                //Открытие меню наблюдателя
+                playerGUI.openPlayerGUI(plugin, p);
     }
     @EventHandler
     public void onClick (InventoryClickEvent e)
@@ -188,13 +204,14 @@ public class HungerListener implements Listener {
     }
     private void chestSetter (@NotNull LinkedList<ItemStack> items, @NotNull Inventory inv, int size)
     {
+        inv.clear();
         //Заполняет сундук случайными НЕ повторяющимищя вещами, из LinkedList<ItemStack> items списка
         LinkedList<ItemStack> no_copy = new LinkedList<>();
         for (int v = 0; v < size; v++) {
             ItemStack item = items.get(randomGenerator.nextInt(size));
             no_copy.add(item);
             items.remove(item);
-            inv.setItem(v, item);
+            inv.setItem(randomGenerator.nextInt(27), item);
         }
         items.addAll(no_copy);
         no_copy.clear();
@@ -251,6 +268,25 @@ public class HungerListener implements Listener {
             }
         }
     }
+    public Player getNearestPlayer (Player player) {
+        double distNear = 0.0D;
+        Player playerNear = null;
+        for (Player player2 : Bukkit.getOnlinePlayers()) {
+            if (player == player2)
+                continue;
+            if (player.getWorld() != player2.getWorld())
+                continue;
+            if (!GameStarter.life_players.contains(player2))
+                continue;
+            Location location2 = player.getLocation();
+            double dist = player2.getLocation().distance(location2);
+            if (playerNear == null || dist < distNear) {
+                playerNear = player2;
+                distNear = dist;
+            }
+        }
+        return playerNear;
+    }
     @EventHandler
     public void onRespawn (PlayerRespawnEvent e)
     {
@@ -261,7 +297,6 @@ public class HungerListener implements Listener {
                 e.getPlayer().getInventory().setItem(i, plugin.compass);
         }
     }
-    // ОТМЕНЕННЫЕ
     @EventHandler
     public void onBlockBreak (BlockBreakEvent e)
     {
@@ -271,12 +306,7 @@ public class HungerListener implements Listener {
         if (e.getPlayer().isOp())
             return;
         e.setCancelled(true);
-    }
-    @EventHandler
-    public void onBlockPlace (BlockPlaceEvent e) {
-        if (e.getPlayer().isOp())
-            return;
-        e.setCancelled(true);
+        e.getBlock().getDrops().clear();
     }
     //В лобби
     @EventHandler

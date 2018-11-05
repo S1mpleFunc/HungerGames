@@ -2,6 +2,7 @@ package ru.func.hungergames;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -38,17 +39,22 @@ public class GameStarter {
         }
         setLocation(plugin);
         plugin.updateScores(plugin, 0, 0, 0);
+
+        Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setCenter(lobby.center);
+        Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setSize(plugin.getConfig().getInt("game.size"));
+        Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setSize(1, 720);
+
         //Запуск игрового таймера
         new BukkitRunnable() {
             HungerListener hungerListener = new HungerListener(plugin);
+
             int time_for_starting = plugin.getConfig().getInt("game.starting_time");
             int time_for_chest = plugin.getConfig().getInt("chest.reload");
             int value_of_chest_replace = plugin.getConfig().getInt("chest.reload_value");
             int death_time = plugin.getConfig().getInt("death_match");
-            int death_size = plugin.getConfig().getInt("game.size");
+
             @Override
             public void run() {
-                //Смерть таймера если с барьером, что то не так
                 if (GameStatus.FINISHING.isActive())
                     this.cancel();
                 //Начало игры
@@ -71,13 +77,7 @@ public class GameStarter {
                         setLocation(plugin);
                         plugin.sendTitle("[§c§l!§f]", "Последний бой");
                         Bukkit.broadcastMessage(plugin.getConfig().getString("game.fight_message"));
-                        Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setCenter(lobby.center);
-                        Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setSize(death_size);
-                    } else if (death_time < 0) {
-                        //Конец таймера
-                        Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().setSize(Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().getSize() - 1);
-                        if (Bukkit.getWorld(plugin.getConfig().getString("lobby.world")).getWorldBorder().getSize() == 1)
-                            this.cancel();
+                        this.cancel();
                     }
                     else
                         plugin.updateScores(plugin, 0, 0, death_time);

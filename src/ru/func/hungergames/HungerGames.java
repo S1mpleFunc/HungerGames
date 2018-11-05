@@ -157,11 +157,11 @@ public class HungerGames extends JavaPlugin {
             discores.add(objective.getScore(scores.get(9) + "§f(§e" + Bukkit.getOnlinePlayers().size() + "§f/§e" + plugin.getConfig().getInt("people_need") + "§f)"));
             discores.add(objective.getScore("  "));
             if (waiting != 0 && GameStatus.WAITING.isActive())
-                discores.add(objective.getScore(scores.get(2) + waiting));
+                discores.add(objective.getScore(scores.get(2) + secondsToString(waiting)));
             else if (chest != 0)
-                discores.add(objective.getScore(scores.get(3) + chest));
+                discores.add(objective.getScore(scores.get(3) + secondsToString(chest)));
             else if (death != 0)
-                discores.add(objective.getScore(scores.get(4) + death));
+                discores.add(objective.getScore(scores.get(4) + secondsToString(death)));
             discores.add(objective.getScore(scores.get(1)));
             discores.add(objective.getScore(" "));
             if (!GameStatus.WAITING.isActive()) {
@@ -204,5 +204,8 @@ public class HungerGames extends JavaPlugin {
                 ));
             }
         } catch (SQLException ex) {}
+    }
+    private String secondsToString(int pTime) {
+        return String.format("%02d:%02d", pTime / 60, pTime % 60);
     }
 }
