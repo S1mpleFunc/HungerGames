@@ -75,7 +75,7 @@ game.x: 257
 game.y: 78
 game.z: 256
 game.radius: 25
-game.size: 250
+game.size: 500
 game.default_size: 2000
 
 # Event Messages
@@ -109,7 +109,9 @@ random.bad_items:
     - 'GOLD_BOOTS'
     - 'WOOD_SWORD'
     - 'GOLD_SWORD'
-
+    - 'WOOD_AXE'
+    - 'STONE_AXE'
+    - 'IRON_AXE'
     - 'STICK'
     - 'LEATHER'
     - 'FEATHER'
@@ -118,11 +120,25 @@ random.bad_items:
     - 'LEATHER'
     - 'FEATHER'
     - 'FLINT'
+    - 'IRON_INGOT'
 random.good_items:
+    - 'COMPASS'
+    - 'COMPASS'
     - 'BOW'
     - 'DIAMOND'
+    - 'DIAMOND'
+    - 'DIAMOND'
     - 'IRON_INGOT'
+    - 'IRON_INGOT'
+    - 'IRON_INGOT'
+    - 'IRON_INGOT'
+    - 'IRON_INGOT'
+    - 'STONE_SWORD'
     - 'FISHING_ROD'
+    - 'WORKBENCH'
+    - 'ENDER_PEARL'
+    - 'BUCKET'
+    - 'FIREBALL'
 
     - 'IRON_HELMET'
     - 'IRON_CHESTPLATE'
@@ -142,5 +158,10 @@ random.good_items:
     - 'GOLDEN_APPLE'
     - 'GOLDEN_CARROT'
 random.potion_items:
-    - 8197
-    - 8200
+    - 'DAMAGE_RESISTANCE:защиты'
+    - 'HEAL:восстановления'
+    - 'NIGHT_VISION:ночного виденья'
+    - 'REGENERATION:регенерации'
+    - 'SLOW:медлительности'
+    - 'SPEED:скорости'
+    - 'POISON:отравления'

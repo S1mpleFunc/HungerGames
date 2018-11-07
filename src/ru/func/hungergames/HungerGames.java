@@ -9,22 +9,20 @@ import org.bukkit.World;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.SplashPotion;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
-import java.util.HashMap;
-import java.util.Arrays;
+import java.util.*;
 
 public class HungerGames extends JavaPlugin {
 
@@ -95,8 +93,14 @@ public class HungerGames extends JavaPlugin {
         toItemStack("random.bad_items", bad_items);
         toItemStack("random.good_items", good_items);
         toItemStack("random.food", food_items);
-        getConfig().getIntegerList("random.potion_items").forEach(x -> potion_items.add(new ItemStack(Material.POTION, 1, (short) (int) x)));
-
+        getConfig().getStringList("random.potion_items").forEach(x -> {
+            ItemStack potion = new ItemStack(Material.SPLASH_POTION);
+            PotionMeta pmeta = (PotionMeta) potion.getItemMeta();
+            pmeta.addCustomEffect(new PotionEffect(PotionEffectType.getByName(x.split(":")[0]), 15, 1), true);
+            pmeta.setDisplayName("§bЗелье §f" + x.split(":")[1] + "§b на §f§l15 §bсекунд.");
+            potion.setItemMeta(pmeta);
+            potion_items.add(potion);
+        });
         updateScores(this, 0, 0, 0);
         //Настройки мира
         Bukkit.setSpawnRadius(0);
@@ -105,6 +109,8 @@ public class HungerGames extends JavaPlugin {
         world.setDifficulty(Difficulty.HARD);
         world.setMonsterSpawnLimit(0);
         world.getEntities().clear();
+        world.setTime(6000);
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "gamerule doFireTick false");
 
         getLogger().info(getConfig().getString("name") + " был запущен.");
     }

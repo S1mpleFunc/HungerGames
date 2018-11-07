@@ -113,8 +113,8 @@ public class HungerListener implements Listener {
             if (target == null)
                 return;
             p.setCompassTarget(target.getLocation());
-            if (target.getLocation().distance(p.getLocation()) < 101) {
-                double xp = target.getLocation().distance(p.getLocation());
+            if (getDistance(target.getLocation(), p.getLocation()) < 101) {
+                double xp = getDistance(target.getLocation(), p.getLocation());
                 p.setExp((float) (xp % 100) / 100);
             }
         }
@@ -137,7 +137,7 @@ public class HungerListener implements Listener {
             int max = plugin.getConfig().getInt("range.max");
             //Заполнение сундука псевдослучайными вещами
             int random_size = (int) (Math.random() * ((max - min) + 1)) + min;
-            if (gameStarter.open_chest.get(name) % 5 == 0) {
+            if (gameStarter.open_chest.get(name) % 6 == 0) {
                 //Если номер открытого игроком сундука кратен четырем, то лут хороший
                 chestSetter(plugin.good_items, e.getInventory(), random_size, name);
                 gameStarter.open_chest.replace(name, 0);
@@ -169,9 +169,11 @@ public class HungerListener implements Listener {
     public void onClick (InventoryClickEvent e)
     {
         Player p = (Player) e.getWhoClicked();
+        if (p.getGameMode().equals(GameMode.SURVIVAL))
+            return;
         Inventory open = e.getInventory();
         ItemStack item = e.getCurrentItem();
-        if (open == null || item == null || !item.hasItemMeta())
+        if (open == null || item == null)
             return;
         if (item.getType().equals(Material.STAINED_GLASS_PANE)) {
             e.setCancelled(true);
@@ -205,19 +207,16 @@ public class HungerListener implements Listener {
     private void chestSetter (@NotNull LinkedList<ItemStack> items, @NotNull Inventory inv, int size, String name)
     {
         inv.clear();
-        //Добавление в каждый 2 сундук случайного зелья
-        if (gameStarter.open_chest.get(name) % 2 == 0)
+        //Добавление в каждый 3 сундук случайного зелья
+        if (gameStarter.open_chest.get(name) % 3 == 0)
             inv.setItem(randomGenerator.nextInt(27), plugin.potion_items.get(randomGenerator.nextInt(plugin.potion_items.size())));
         //Заполняет сундук случайными НЕ повторяющимищя вещами, из LinkedList<ItemStack> items списка
-        LinkedList<ItemStack> no_copy = new LinkedList<>();
         for (int v = 0; v < size; v++) {
-            ItemStack item = items.get(randomGenerator.nextInt(size));
-            no_copy.add(item);
-            items.remove(item);
+            ItemStack item = items.get(randomGenerator.nextInt(items.size()));
+            if (inv.contains(item))
+                continue;
             inv.setItem(randomGenerator.nextInt(27), item);
         }
-        items.addAll(no_copy);
-        no_copy.clear();
     }
     private void closeGame ()
     {
@@ -274,21 +273,26 @@ public class HungerListener implements Listener {
     public Player getNearestPlayer (Player player) {
         double distNear = 0.0D;
         Player playerNear = null;
-        for (Player player2 : Bukkit.getOnlinePlayers()) {
-            if (player == player2)
+        for (Player current : Bukkit.getOnlinePlayers()) {
+            if (player == current)
                 continue;
-            if (player.getWorld() != player2.getWorld())
+            if (player.getWorld() != current.getWorld())
                 continue;
-            if (!GameStarter.life_players.contains(player2))
+            if (!GameStarter.life_players.contains(current))
                 continue;
             Location location2 = player.getLocation();
-            double dist = player2.getLocation().distance(location2);
+            double dist = getDistance(current.getLocation(), location2);
             if (playerNear == null || dist < distNear) {
-                playerNear = player2;
+                playerNear = current;
                 distNear = dist;
             }
         }
         return playerNear;
+    }
+    private double getDistance (Location first, Location second)
+    {
+        double distance = Math.pow(second.getX() - first.getX(), 2) + Math.pow(second.getZ() - first.getZ(), 2);
+        return Math.abs(Math.sqrt(distance));
     }
     @EventHandler
     public void onRespawn (PlayerRespawnEvent e)
