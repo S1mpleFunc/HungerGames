@@ -33,14 +33,20 @@ public class Lobby {
         //Запуск таймера до начала игры
         new BukkitRunnable() {
             public int waitingTime = plugin.getConfig().getInt("waiting_time");
+            public int people_need = plugin.getConfig().getInt("people_need");
             @Override
             public void run ()
             {
                 waitingTime = waitingTime - 1;
                 plugin.updateScores(plugin, waitingTime, 0, 0);
                 //Выдает уровень
-                for (Player p : Bukkit.getOnlinePlayers())
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (Bukkit.getOnlinePlayers().size() > people_need)
+                        p.setExp(1);
+                    else
+                        p.setExp(((float) Bukkit.getOnlinePlayers().size() / people_need) % 100);
                     p.setLevel(waitingTime);
+                }
                 if (waitingTime == 0)
                 {
                     new GameStarter().startGame(plugin);

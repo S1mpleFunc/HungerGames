@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -113,7 +114,7 @@ public class HungerListener implements Listener {
             if (target == null)
                 return;
             p.setCompassTarget(target.getLocation());
-            if (getDistance(target.getLocation(), p.getLocation()) < 101) {
+            if (getDistance(target.getLocation(), p.getLocation()) < 100) {
                 double xp = getDistance(target.getLocation(), p.getLocation());
                 p.setExp((float) (xp % 100) / 100);
             }
@@ -293,6 +294,22 @@ public class HungerListener implements Listener {
     {
         double distance = Math.pow(second.getX() - first.getX(), 2) + Math.pow(second.getZ() - first.getZ(), 2);
         return Math.abs(Math.sqrt(distance));
+    }
+    @EventHandler
+    public void onBlockPlace (BlockPlaceEvent e)
+    {
+        if (!e.getBlock().getType().equals(Material.WORKBENCH))
+            return;
+        Player p = e.getPlayer();
+        p.sendMessage("[§a!§f] Верстак поставлен! Он будет §cуничтожен§f через §l10§f секунд.");
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                e.getBlock().setType(Material.AIR);
+                p.sendMessage("[§c!§f] Верстак удален!");
+                this.cancel();
+            }
+        }.runTaskLater(plugin, 200);
     }
     @EventHandler
     public void onRespawn (PlayerRespawnEvent e)

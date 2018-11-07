@@ -2,7 +2,6 @@ package ru.func.hungergames;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;

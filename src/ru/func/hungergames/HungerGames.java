@@ -96,8 +96,11 @@ public class HungerGames extends JavaPlugin {
         getConfig().getStringList("random.potion_items").forEach(x -> {
             ItemStack potion = new ItemStack(Material.SPLASH_POTION);
             PotionMeta pmeta = (PotionMeta) potion.getItemMeta();
-            pmeta.addCustomEffect(new PotionEffect(PotionEffectType.getByName(x.split(":")[0]), 15, 1), true);
-            pmeta.setDisplayName("§bЗелье §f" + x.split(":")[1] + "§b на §f§l15 §bсекунд.");
+            String[] ipotion = x.split(":");
+            String name = ipotion[0];
+            String rusname = ipotion[1];
+            pmeta.addCustomEffect(new PotionEffect(PotionEffectType.getByName(name), 300, 0), true);
+            pmeta.setDisplayName("§fЗелье " + rusname + "§f на §f§l15 §fсекунд.");
             potion.setItemMeta(pmeta);
             potion_items.add(potion);
         });
