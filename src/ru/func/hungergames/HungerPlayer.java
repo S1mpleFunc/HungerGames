@@ -7,14 +7,16 @@ public class HungerPlayer {
     int district;
     int wins;
     int coins;
+    String rewards;
 
-    public HungerPlayer (int kills, int deaths, int district, int wins, int coins)
+    public HungerPlayer (int kills, int deaths, int district, int wins, int coins, String rewards)
     {
         this.kills = kills;
         this.deaths = deaths;
         this.district = district;
         this.wins = wins;
         this.coins = coins;
+        this.rewards = rewards;
     }
     public int getKills() {
         return kills;
@@ -30,5 +32,8 @@ public class HungerPlayer {
     }
     public int getCoins() {
         return coins;
+    }
+    public String getRewards() {
+        return rewards;
     }
 }

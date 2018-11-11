@@ -24,7 +24,7 @@ end_time: 15
 
 # Lores
 
-lores.sponsor: '§fНЕ ДОСТУПНО'
+lores.sponsor: '§fЗаслуги.'
 lores.chance: '§fПосмотреть вероятность победы'
 lores.teleport: '§fПеремещение к выбранному игроку.'
 lores.inventory: '§fПосмотреть инвентарь игрока.'

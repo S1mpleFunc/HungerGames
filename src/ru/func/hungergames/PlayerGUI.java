@@ -16,6 +16,8 @@ import java.util.List;
 
 public class PlayerGUI {
 
+    GameStarter gameStarter = new GameStarter();
+
     public void openPlayerGUI(HungerGames plugin, @NotNull Player p) {
         //Инвентарь с живыми игроками
         Inventory i = Bukkit.createInventory(null, 45,"§b§lИгрушка наблюдателя");
@@ -66,29 +68,28 @@ public class PlayerGUI {
         //Открытие инвентаря
         p.openInventory(i);
     }
-    private void openSponsoeMenu (HungerGames plugin, @NotNull Player p, @NotNull Player l)
-    {
-        //НЕ ДОДЕЛАНО////////////////////////////////////////////////
-        Inventory i = Bukkit.createInventory(null, 27, l.getName());
-
-        for (int u = 0; u < 9; u++)
-            i.setItem(u, plugin.empty);
-        //Добаление предметов для спонсирования
-        for (int u = 18; u < 27; u++)
-            i.setItem(u, plugin.empty);
-
-        p.openInventory(i);
-        ///////////////////////////////////////////////////////////////
+    public void openRewards (HungerGames plugin, Player p, Player open) {
+        Inventory i = Bukkit.createInventory(null, 45, "§e§lНаграды");
+        for (int v = 0; v < 9; v++)
+            i.setItem(v, plugin.empty);
+        if (plugin.playerStats.containsKey(p.getUniqueId())) {
+            int n = 9;
+            for (String s : plugin.playerStats.get(p.getUniqueId()).getRewards().split(" ")) {
+                Rewards r = Rewards.valueOf(s);
+                i.setItem(n, plugin.getItem(r.getMaterial(), r.getName(), "§fПолучил " + r.getCause(), 0));
+                n = n + 1;
+            }
+        }
+        for (int v = 36; v < 45; v++)
+            i.setItem(v, plugin.empty);
+        open.openInventory(i);
     }
-    public void teamGUIHandler (HungerGames plugin, @NotNull Player p, @NotNull ItemStack item)
-    {
-        GameStarter gameStarter = new GameStarter();
+    public void teamGUIHandler (HungerGames plugin, @NotNull Player p, @NotNull ItemStack item) {
         //Обработка возможных предметов
         if (gameStarter.life_players.contains(p))
             return;
         Material type = item.getType();
-        if (type.equals(Material.SKULL_ITEM))
-        {
+        if (type.equals(Material.SKULL_ITEM)) {
             //Открытие инвентаря с интерактивными предметами
             for (Player player : gameStarter.life_players)
                 if (player.getName().equals(ChatColor.stripColor(item.getItemMeta().getDisplayName())))
@@ -98,9 +99,10 @@ public class PlayerGUI {
             for (Player player : gameStarter.life_players)
                 if (player.getName().equals(p.getOpenInventory().getTitle()))
                     p.teleport(player.getLocation());
-        } else if (type.equals(Material.GOLD_INGOT))
-            //Открывает меню спонсирования
-        {
+        } else if (type.equals(Material.DIAMOND_BLOCK)) {
+            for (Player player : gameStarter.life_players)
+                if (player.getName().equals(p.getOpenInventory().getTitle()))
+                    openRewards(plugin, player, p);
         } else if (type.equals(Material.CHEST))
         {
             //Открывает инвентарь игрока

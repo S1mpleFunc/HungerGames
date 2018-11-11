@@ -2,13 +2,9 @@ package ru.func.hungergames;
 
 import com.sun.istack.internal.NotNull;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -44,22 +40,24 @@ public class HungerListener implements Listener {
     @EventHandler
     public void onJoin (PlayerJoinEvent e)
     {
+        Player p = e.getPlayer();
         //Выполнение первичных функций с игроком
-        plugin.loadStats(e.getPlayer(), plugin);
-        plugin.hashStats(e.getPlayer().getUniqueId(), plugin);
+        plugin.loadStats(p, plugin);
+        plugin.hashStats(p.getUniqueId(), plugin);
         plugin.updateScores(plugin, 0, 0, 0);
-        e.getPlayer().getInventory().clear();
+        p.getInventory().clear();
         if (GameStatus.WAITING.isActive()) {
-            e.getPlayer().teleport(Lobby.center);
-            e.getPlayer().setGameMode(GameMode.SURVIVAL);
+            p.teleport(Lobby.center);
+            p.setGameMode(GameMode.SURVIVAL);
+            p.getInventory().setItem(4, plugin.reward_menu);
         }
         else if (GameStatus.STARTED.isActive() || GameStatus.STARTING.isActive()) {
             //Выдача режима наблюдателя и заполнение инвентаря навигатаром
-            e.getPlayer().setGameMode(GameMode.SPECTATOR);
+            p.setGameMode(GameMode.SPECTATOR);
             for (int i = 0; i < 9; i ++)
-                e.getPlayer().getInventory().setItem(i, plugin.compass);
+                p.getInventory().setItem(i, plugin.compass);
         }
-        e.setJoinMessage(plugin.getConfig().getString("event.join") + "§l" + e.getPlayer().getName());
+        e.setJoinMessage(plugin.getConfig().getString("event.join") + "§l" + p.getName());
     }
     @EventHandler
     public void onLeave (PlayerQuitEvent e)
@@ -122,11 +120,11 @@ public class HungerListener implements Listener {
     }
     @EventHandler
     public void onInventoryOpenEvent(InventoryOpenEvent e) {
-        if (!GameStatus.STARTED.isActive()) {
-            e.setCancelled(true);
-            return;
-        }
         if (e.getInventory().getHolder() instanceof Chest || e.getInventory().getHolder() instanceof DoubleChest) {
+            if (GameStatus.WAITING.isActive()) {
+                e.setCancelled(true);
+                return;
+            }
             if (openned_chests.contains(e.getInventory().getLocation()))
                 return;
             if (!gameStarter.life_players.contains(e.getPlayer()))
@@ -158,17 +156,22 @@ public class HungerListener implements Listener {
     @EventHandler
     public void onInteract (PlayerInteractEvent e)
     {
-        if (GameStatus.WAITING.isActive())
-            return;
         Player p = e.getPlayer();
+        if (GameStatus.WAITING.isActive() && p.getItemInHand().getType().equals(Material.PAPER)) {
+            playerGUI.openRewards(plugin, p, p);
+            return;
+        }
         if (p.getItemInHand().getType().equals(Material.COMPASS))
             if (p.getGameMode().equals(GameMode.SPECTATOR))
                 //Открытие меню наблюдателя
                 playerGUI.openPlayerGUI(plugin, p);
+
     }
     @EventHandler
     public void onClick (InventoryClickEvent e)
     {
+        if (GameStatus.WAITING.isActive())
+            e.setCancelled(true);
         Player p = (Player) e.getWhoClicked();
         if (p.getGameMode().equals(GameMode.SURVIVAL))
             return;
@@ -221,7 +224,7 @@ public class HungerListener implements Listener {
     }
     private void closeGame ()
     {
-        if (gameStarter.life_players.size() != 1)
+        if (gameStarter.life_players.size() > 1)
             return;
         //Завершение игры
         //Очистка открытых сундуков
@@ -234,7 +237,9 @@ public class HungerListener implements Listener {
         saveStats();
         Bukkit.broadcastMessage(plugin.getConfig().getString("game.kills_message"));
         //Выведение списка убийств за игру
-        Bukkit.getOnlinePlayers().stream().filter(p -> gameStarter.kills.containsKey(p.getName()) && gameStarter.kills.get(p.getName()) != 0).forEach(p -> Bukkit.broadcastMessage("  *  " + p.getName() + " §fубил §c§l" + gameStarter.kills.get(p.getName()) + "§f игроков(а)."));
+        Bukkit.getOnlinePlayers().stream()
+                .filter(p -> gameStarter.kills.containsKey(p.getName()) && gameStarter.kills.get(p.getName()) != 0)
+                .forEach(p -> Bukkit.broadcastMessage("  *  " + p.getName() + " §fубил §c§l" + gameStarter.kills.get(p.getName()) + "§f игроков(а)."));
         //Выведение имени победителя
         plugin.sendTitle("[§a!§f]", "Победа!");
         Bukkit.broadcastMessage("[§a!§f]§l " + winner.getName() + " §f победил!");
@@ -319,6 +324,8 @@ public class HungerListener implements Listener {
             e.getPlayer().setGameMode(GameMode.SPECTATOR);
             for (int i = 0; i < 9; i ++)
                 e.getPlayer().getInventory().setItem(i, plugin.compass);
+            if (GameStarter.life_players.contains(e.getPlayer()))
+                GameStarter.life_players.remove(e.getPlayer());
         }
     }
     @EventHandler
@@ -344,5 +351,16 @@ public class HungerListener implements Listener {
     {
         if (GameStatus.WAITING.isActive() || GameStatus.STARTING.isActive())
             e.setCancelled(true);
+    }
+    @EventHandler
+    public void onDropItem (PlayerDropItemEvent e)
+    {
+        if (GameStatus.WAITING.isActive())
+            e.setCancelled(true);
+    }
+    @EventHandler
+    public void onChangeItem (PlayerSwapHandItemsEvent e)
+    {
+        e.setCancelled(true);
     }
 }

@@ -22,7 +22,10 @@ public class Lobby {
         );
         //Очистка инвентарей всех игроков, выдача режима выживания всем игрокам, телепортация всех к центру
         for (Player p : Bukkit.getOnlinePlayers()) {
+            plugin.loadStats(p, plugin);
+            plugin.hashStats(p.getUniqueId(), plugin);
             p.getInventory().clear();
+            p.getInventory().setItem(4, plugin.reward_menu);
             p.setGameMode(GameMode.SURVIVAL);
             p.teleport(center);
             p.setFoodLevel(20);

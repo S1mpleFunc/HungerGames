@@ -9,7 +9,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.SplashPotion;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -40,6 +39,8 @@ public class HungerGames extends JavaPlugin {
     private ItemMeta compass_meta = compass.getItemMeta();
     Statement statement;
 
+    public ItemStack reward_menu;
+
     public ItemStack empty;
     public ItemStack gold;
     public ItemStack tp;
@@ -53,14 +54,11 @@ public class HungerGames extends JavaPlugin {
     {
         registerConfig();
         //Определение предметов, в компасе наблюдателя (кроме бумаги со статистикой(т. к. она не общая, а личная)), и серого стекла
-        gold = getItem(Material.GOLD_INGOT, "§e§lСпонсировать игрока", getConfig().getString("lores.sponsor"));
-        tp = getItem(Material.EYE_OF_ENDER, "§e§lТелепортироваться к игроку", getConfig().getString("lores.teleport"));
-        inv = getItem(Material.CHEST, "§e§lИнвентарь игрока", getConfig().getString("lores.inventory"));
-
-        empty = new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) 15);
-        ItemMeta emptyMeta = empty.getItemMeta();
-        emptyMeta.setDisplayName("/");
-        empty.setItemMeta(emptyMeta);
+        gold = getItem(Material.DIAMOND_BLOCK, "§e§lЗаслуги игрока", getConfig().getString("lores.sponsor"), 0);
+        tp = getItem(Material.EYE_OF_ENDER, "§e§lТелепортироваться к игроку", getConfig().getString("lores.teleport"), 0);
+        inv = getItem(Material.CHEST, "§e§lИнвентарь игрока", getConfig().getString("lores.inventory"), 0);
+        empty = getItem(Material.STAINED_GLASS_PANE, "/", "", 15);
+        reward_menu = getItem(Material.PAPER, "Ваши награды", "Покажет вам ваши награды.", 0);
 
         World world = Bukkit.getWorld(getConfig().getString("lobby.world"));
 
@@ -77,16 +75,11 @@ public class HungerGames extends JavaPlugin {
         try {
             getLogger().info("[!] Connecting to DataBase.");
             statement = base.openConnection().createStatement();
-            statement.executeUpdate("CREATE TABLE IF NOT EXISTS `TEST` (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, uuid TEXT, name TEXT, gold INT, district INT, kills INT, wins INT, deaths INT);");
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS `TEST` (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, uuid TEXT, name TEXT, gold INT, district INT, kills INT, wins INT, deaths INT, rewards TEXT);");
             getLogger().info("[!] Connected to DataBase.");
         } catch (ClassNotFoundException | SQLException e)
         {
             getLogger().info("[!] Connection exception.");
-        }
-        //Загрузка, создание игрока
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            loadStats(p, this);
-            hashStats(p.getUniqueId(), this);
         }
         //Запуск лобби
         lobby.waitLobby(this);
@@ -112,7 +105,7 @@ public class HungerGames extends JavaPlugin {
         world.setDifficulty(Difficulty.HARD);
         world.setMonsterSpawnLimit(0);
         world.getEntities().clear();
-        world.setTime(6000);
+        world.setTime(5000);
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "gamerule doFireTick false");
 
         getLogger().info(getConfig().getString("name") + " был запущен.");
@@ -129,7 +122,7 @@ public class HungerGames extends JavaPlugin {
         try {
             ResultSet rs = statement.executeQuery("SELECT * FROM `TEST` WHERE uuid = '" + p.getUniqueId() + "';");
             if (!rs.next()) {
-                statement.executeUpdate("INSERT INTO `TEST` (uuid, name, gold, district, kills, wins, deaths) VALUES('" + p.getUniqueId() + "', '" + p.getName() + "', 0, 13, 0, 0, 1);");
+                statement.executeUpdate("INSERT INTO `TEST` (uuid, name, gold, district, kills, wins, deaths, rewards) VALUES('" + p.getUniqueId() + "', '" + p.getName() + "', 0, 13, 0, 0, 1, 'WINNER_WINTER_SEASON_18 TOP10_WINTER_SEASON_18 TOP10_AUTUMN_SEASON_19 WINNER_AUTUMN_SEASON_19 ALPHA_TEST KILL_LEAD OLD_PLAYER');");
                 p.sendMessage(plugin.getConfig().getString("profile.new"));
             }
             else
@@ -164,11 +157,11 @@ public class HungerGames extends JavaPlugin {
             Scoreboard board = manager.getNewScoreboard();
             Objective objective = board.registerNewObjective("scoreboard","dummy");
             objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-            objective.setDisplayName(plugin.getConfig().getString("name"));
+            objective.setDisplayName(getConfig().getString("name"));
             for (String s : p.getScoreboard().getEntries())
                 p.getScoreboard().resetScores(s);
             LinkedList<Score> discores = new LinkedList<>();
-            discores.add(objective.getScore(scores.get(9) + "§f(§e" + Bukkit.getOnlinePlayers().size() + "§f/§e" + plugin.getConfig().getInt("people_need") + "§f)"));
+            discores.add(objective.getScore(scores.get(9) + "§f(§e" + Bukkit.getOnlinePlayers().size() + "§f/§e" + getConfig().getInt("people_need") + "§f)"));
             discores.add(objective.getScore("  "));
             if (waiting != 0 && GameStatus.WAITING.isActive())
                 discores.add(objective.getScore(scores.get(2) + secondsToString(waiting)));
@@ -183,10 +176,11 @@ public class HungerGames extends JavaPlugin {
                 if (gameStarter.kills.containsKey(p.getName()))
                     discores.add(objective.getScore(scores.get(5) + gameStarter.kills.get(p.getName())));
             } else
-                discores.add(objective.getScore(scores.get(10) + plugin.playerStats.get(p.getUniqueId()).getKills()));
-            discores.add(objective.getScore(scores.get(6) + plugin.playerStats.get(p.getUniqueId()).getCoins()));
-            discores.add(objective.getScore(scores.get(7) + plugin.playerStats.get(p.getUniqueId()).getWins()));
-            discores.add(objective.getScore(scores.get(8) + plugin.playerStats.get(p.getUniqueId()).getDistrict()));
+                if (playerStats.containsKey(p.getUniqueId()))
+                discores.add(objective.getScore(scores.get(10) + playerStats.get(p.getUniqueId()).getKills()));
+            discores.add(objective.getScore(scores.get(6) + playerStats.get(p.getUniqueId()).getCoins()));
+            discores.add(objective.getScore(scores.get(7) + playerStats.get(p.getUniqueId()).getWins()));
+            discores.add(objective.getScore(scores.get(8) + playerStats.get(p.getUniqueId()).getDistrict()));
 
             for (Score s : discores)
                 s.setScore(discores.indexOf(s));
@@ -194,9 +188,9 @@ public class HungerGames extends JavaPlugin {
             p.setScoreboard(board);
         }
     }
-    public ItemStack getItem (@NotNull Material material, @NotNull String name, @NotNull String lore)
+    public ItemStack getItem (@NotNull Material material, @NotNull String name, @NotNull String lore, int color)
     {
-        ItemStack is = new ItemStack(material);
+        ItemStack is = new ItemStack(material, 1, (byte) color);
         ItemMeta im = is.getItemMeta();
         im.setDisplayName(name);
         im.setLore(Arrays.asList(lore));
@@ -214,7 +208,8 @@ public class HungerGames extends JavaPlugin {
                         rs.getInt("deaths"),
                         rs.getInt("district"),
                         rs.getInt("wins"),
-                        rs.getInt("gold")
+                        rs.getInt("gold"),
+                        rs.getString("rewards")
                 ));
             }
         } catch (SQLException ex) {}
